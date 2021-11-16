@@ -74,12 +74,14 @@ namespace bsp::bell_switches
         void setPressed()
         {
             cpp_freertos::LockGuard lock(latchFlagMutex);
+            LOG_DEBUG("///////////// setPressed");
             pressed    = true;
             changeFlag = true;
         }
 
         void setReleased()
         {
+            LOG_DEBUG("///////////// setReleased");
             cpp_freertos::LockGuard lock(latchFlagMutex);
             pressed    = false;
             changeFlag = true;
@@ -87,18 +89,21 @@ namespace bsp::bell_switches
 
         bool isPressed()
         {
+            LOG_DEBUG("///////////// isPressed? %d", pressed);
             cpp_freertos::LockGuard lock(latchFlagMutex);
             return pressed;
         }
 
         bool wasMarkedChanged()
         {
+            LOG_DEBUG("///////////// wasMarkedChanged? %d", changeFlag);
             cpp_freertos::LockGuard lock(latchFlagMutex);
             return changeFlag;
         }
 
         void clearChangedMark()
         {
+            LOG_DEBUG("///////////// clearChangedMark");
             cpp_freertos::LockGuard lock(latchFlagMutex);
             changeFlag = false;
         }
@@ -116,13 +121,15 @@ namespace bsp::bell_switches
         auto timerState                     = static_cast<DebounceTimerState *>(pvTimerGetTimerID(timerHandle));
         BaseType_t xHigherPriorityTaskWoken = pdFALSE;
         xTimerStop(timerState->timer, 0);
-
         auto currentState = timerState->gpio->ReadPin(static_cast<uint32_t>(timerState->pin)) ? KeyEvents::Released
                                                                                               : KeyEvents::Pressed;
-
+        if (timerState->notificationSource == NotificationSource::latchKeyPress) {
+            LOG_DEBUG("----------------------debounceTimerCallback: CURRENT STATE: %d LASTSTATE: %d", magic_enum::enum_integer(currentState), magic_enum::enum_integer(timerState->lastState));
+        }
         if (currentState == timerState->lastState && qHandleIrq != nullptr) {
             if (currentState == KeyEvents::Pressed) {
                 if (timerState->notificationSource == NotificationSource::latchKeyPress) {
+                    LOG_DEBUG("timerState->notificationSource == NotificationSource::latchKeyPress 1");
                     latchEventFlag.setPressed();
                 }
                 auto val = static_cast<std::uint16_t>(timerState->notificationSource);
@@ -131,6 +138,7 @@ namespace bsp::bell_switches
             }
             else {
                 if (timerState->notificationSource == NotificationSource::latchKeyPress) {
+                    LOG_DEBUG("timerState->notificationSource == NotificationSource::latchKeyPress 2");
                     latchEventFlag.setReleased();
                 }
                 auto val = NotificationSource::Invalid;
@@ -145,6 +153,7 @@ namespace bsp::bell_switches
                     val = NotificationSource::lightCenterKeyRelease;
                     break;
                 case NotificationSource::latchKeyPress:
+                    LOG_DEBUG("----------------- latchKeyPress");
                     val = NotificationSource::latchKeyRelease;
                     break;
                 case NotificationSource::wakeupEvent:
@@ -265,10 +274,14 @@ namespace bsp::bell_switches
             auto timerState = static_cast<DebounceTimerState *>(
                 pvTimerGetTimerID(debounceTimers[DebounceTimerId::latchSwitch].timer));
             timerState->lastState = KeyEvents::Released;
+            LOG_DEBUG("-------------- LATCH STATE AT THE BEGINNING IS %d LASTSTATE: %d", magic_enum::enum_integer(KeyEvents::Pressed), magic_enum::enum_integer(KeyEvents::Released));
+        } else {
+            LOG_DEBUG("-------------- LATCH STATE AT THE BEGINNING IS %d LASTSTATE: %d", magic_enum::enum_integer(KeyEvents::Released), magic_enum::enum_integer(KeyEvents::Pressed));
         }
 
+        clearStartupLatchInterrupt();
         enableIRQ();
-
+  
         return kStatus_Success;
     }
 
@@ -424,6 +437,12 @@ namespace bsp::bell_switches
     bool isLatchPressed()
     {
         return latchEventFlag.isPressed();
+    }
+
+    void clearStartupLatchInterrupt()
+    {
+        // Knob sets up interrupt on startup because of hw design
+        gpio_sw->ClearPortInterrupts(1 << static_cast<uint32_t>(BoardDefinitions::BELL_SWITCHES_LATCH));
     }
 
 } // namespace bsp::bell_switches

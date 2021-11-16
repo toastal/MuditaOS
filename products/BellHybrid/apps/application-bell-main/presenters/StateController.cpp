@@ -282,6 +282,7 @@ namespace app::home_screen
                 using namespace sml;
                 // clang-format off
                 return make_transition_table(*"Init"_s + sml::on_entry<_> / Init::entry,
+                                             "Init"_s + event<Events::ModelReady> [Helpers::isDeepPress] = "Deactivated"_s,
                                              "Init"_s + event<Events::ModelReady> [Helpers::isDeactivated] = "Deactivated"_s,
                                              "Init"_s + event<Events::ModelReady> [Helpers::isActivated] = "Activated"_s,
                                              "Init"_s + event<Events::ModelReady> [Helpers::isSnoozed] = "AlarmSnoozed"_s,
@@ -289,7 +290,7 @@ namespace app::home_screen
 
                                              "Deactivated"_s + sml::on_entry<_> / Deactivated::entry,
                                              "Deactivated"_s + event<Events::Reset> = "Init"_s,
-                                             "Deactivated"_s [Helpers::isDeepPress] = "DeactivatedWait"_s,
+                                             //"Deactivated"_s [Helpers::isDeepPress] = "DeactivatedWait"_s,
                                              "Deactivated"_s + event<Events::LightPress>/ Helpers::switchToMenu,
                                              "Deactivated"_s + event<Events::RotateLeftPress> / Helpers::makeAlarmEditable = "DeactivatedEdit"_s,
                                              "Deactivated"_s + event<Events::RotateRightPress> / Helpers::makeAlarmEditable = "DeactivatedEdit"_s,
