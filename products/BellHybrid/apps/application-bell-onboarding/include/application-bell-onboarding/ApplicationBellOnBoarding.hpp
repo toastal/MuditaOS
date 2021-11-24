@@ -48,6 +48,7 @@ namespace app
 
         sys::ReturnCodes InitHandler() override;
         sys::MessagePointer DataReceivedHandler(sys::DataMessage *msgl, sys::ResponseMessage *resp) override;
+        void refreshWindow(gui::RefreshModes mode) override;
         sys::ReturnCodes SwitchPowerModeHandler(const sys::ServicePowerMode mode) final;
         void createUserInterface() override;
         void destroyUserInterface() override;

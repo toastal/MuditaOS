@@ -19,6 +19,7 @@ namespace gui
             const std::string &name = gui::window::name::onBoardingLanguageWindow);
 
       private:
+        bool windowLoaded = false;
         std::unique_ptr<app::OnBoarding::OnBoardingLanguageWindowPresenter::Presenter> presenter;
 
         std::list<Option> languageOptionsList();

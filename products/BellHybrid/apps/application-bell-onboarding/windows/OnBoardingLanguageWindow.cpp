@@ -14,6 +14,7 @@ namespace gui
     {
         this->presenter->attach(this);
         refreshOptions(languageOptionsList(), this->presenter->getSelectedLanguageIndex());
+        windowLoaded = true;
     }
 
     std::list<Option> OnBoardingLanguageWindow::languageOptionsList()
@@ -23,11 +24,16 @@ namespace gui
         for (auto language : presenter->getLanguages()) {
             languageOptionList.emplace_back(std::make_unique<gui::option::OptionBellMenu>(
                 language,
-                [=](gui::Item &item) {
-                    presenter->setLanguage(language);
+                [this](gui::Item &item) {
+                    application->switchWindow(gui::window::name::onBoardingSettingsWindow);
                     return true;
                 },
-                nullptr,
+                [=](gui::Item &item) {
+                    if (item.focus && windowLoaded) {
+                        presenter->setLanguage(language);
+                    }
+                    return false;
+                },
                 this));
         }
 

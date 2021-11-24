@@ -11,6 +11,7 @@ namespace app
     {
       public:
         using ApplicationCommon::ApplicationCommon;
+        virtual void refreshWindow(gui::RefreshModes mode);
 
       protected:
         void attachPopups(const std::vector<gui::popup::ID> &popupsList) override;

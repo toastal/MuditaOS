@@ -40,13 +40,13 @@ namespace app
         }
         createUserInterface();
 
-        connect(typeid(manager::GetCurrentDisplayLanguageResponse), [&](sys::Message *msg) {
-            if (gui::window::name::onBoardingLanguageWindow == getCurrentWindow()->getName()) {
-                switchWindow(gui::window::name::onBoardingSettingsWindow);
-                return sys::msgHandled();
-            }
-            return sys::msgNotHandled();
-        });
+        // connect(typeid(manager::GetCurrentDisplayLanguageResponse), [&](sys::Message *msg) {
+        //    if (gui::window::name::onBoardingLanguageWindow == getCurrentWindow()->getName()) {
+        //        switchWindow(gui::window::name::onBoardingSettingsWindow);
+        //        return sys::msgHandled();
+        //    }
+        //    return sys::msgNotHandled();
+        //});
 
         informationPromptTimer = sys::TimerFactory::createSingleShotTimer(
             this,
@@ -55,6 +55,15 @@ namespace app
             [this]([[maybe_unused]] sys::Timer &timer) { displayInformation(getCurrentWindow()->getName()); });
 
         return sys::ReturnCodes::Success;
+    }
+
+    void ApplicationBellOnBoarding::refreshWindow(gui::RefreshModes mode)
+    {
+        if (!(getCurrentWindow()->getName() == gui::window::name::onBoardingLanguageWindow)) {
+            LOG_DEBUG("Refreshing, its not language window");
+            Application::refreshWindow(mode);
+        }
+        LOG_DEBUG("Not refreshing, its not language window");
     }
 
     void ApplicationBellOnBoarding::createUserInterface()

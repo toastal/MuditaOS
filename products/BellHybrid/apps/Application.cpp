@@ -73,6 +73,11 @@ namespace app
         }
     }
 
+    void Application::refreshWindow(gui::RefreshModes mode)
+    {
+        ApplicationCommon::refreshWindow(mode);
+    }
+
     bool Application::isPopupPermitted(gui::popup::ID) const
     {
         return not((isCurrentWindow(gui::popup::resolveWindowName(gui::popup::ID::Reboot))) ||
