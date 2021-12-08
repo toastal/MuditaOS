@@ -30,6 +30,7 @@ namespace gui
         [[nodiscard]] Position getMarginInAxis(Axis axis, MarginInAxis pos) const;
         bool operator==(const Margins &margins);
         bool operator!=(const Margins &margins);
+        Margins operator+(const Margins &margins);
     };
 
     using Padding = Margins;

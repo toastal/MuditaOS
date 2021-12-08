@@ -27,6 +27,7 @@ namespace gui
         rectangle->setFilled(false);
         rectangle->setRadius(barStyle.radius);
         rectangle->setPenWidth(style::window::default_border_focus_w);
+        rectangle->setAlignment({Alignment::Horizontal::Center, Alignment::Vertical::Center});
         return rectangle;
     }
 
@@ -53,10 +54,10 @@ namespace gui
 
         currentLevel = value;
         for (std::uint32_t i = 0; i < currentLevel; i++) {
-            barStyle.fillRender(rectangles[i]);
+            barStyle.fillRender(rectangles[i], i);
         }
         for (std::uint32_t i = currentLevel; i < numberOfRectangles; i++) {
-            barStyle.emptyRender(rectangles[i]);
+            barStyle.emptyRender(rectangles[i], i);
         }
 
         return true;
@@ -80,13 +81,39 @@ namespace gui
         switch (graphStyle) {
         case BarGraphStyle::Heavy:
             barStyle.radius      = style::bargraph::radius_medium;
-            barStyle.fillRender  = [](gui::Rect *bar) { bar->setFillColor(ColorFullBlack); };
-            barStyle.emptyRender = [](gui::Rect *bar) { bar->setFillColor(ColorFullWhite); };
+            barStyle.fillRender  = [&](gui::Rect *bar, unsigned int i) {
+                bar->setFillColor(ColorFullBlack);
+                bar->setRadius(style::bargraph::radius_medium);
+                bar->setFillColor(ColorFullBlack);
+                bar->setMinimumSize(barStyle.width, barStyle.height);
+                bar->setMaximumSize(barStyle.width, barStyle.height);
+                i != 0 ? bar->setMargins(barStyle.margin) : bar->setMargins({0, 0, 0, 0});
+                bar->informContentChanged();
+            };
+            barStyle.emptyRender = [&](gui::Rect *bar, unsigned int i) {
+                bar->setRadius(style::bargraph::radius_small);
+                bar->setFillColor(ColorFullBlack);
+                bar->setMinimumSize(barStyle.width, barStyle.empty);
+                bar->setMaximumSize(barStyle.width, barStyle.empty);
+                i != 0 ? bar->setMargins(barStyle.margin + Margins{0, 2, 0, 2}) : bar->setMargins({0, 0, 0, 0});
+                bar->informContentChanged();
+            };
             break;
         case BarGraphStyle::Light:
             barStyle.radius      = style::bargraph::radius_small;
-            barStyle.fillRender  = [](gui::Rect *bar) { bar->setBorderColor(ColorFullBlack); };
-            barStyle.emptyRender = [](gui::Rect *bar) { bar->setBorderColor(ColorGrey); };
+            barStyle.fillRender  = [&](gui::Rect *bar, unsigned int i) {
+                bar->setFillColor(ColorFullBlack);
+                bar->setFillColor(ColorFullBlack);
+                bar->setMinimumSize(barStyle.width, barStyle.height);
+                bar->setMaximumSize(barStyle.width, barStyle.height);
+                bar->informContentChanged();
+            };
+            barStyle.emptyRender = [&](gui::Rect *bar, unsigned int i) {
+                bar->setFillColor(ColorFullBlack);
+                bar->setMinimumSize(barStyle.empty, barStyle.empty);
+                bar->setMaximumSize(barStyle.empty, barStyle.empty);
+                bar->informContentChanged();
+            };
             break;
         }
     }
@@ -129,11 +156,13 @@ namespace gui
         case BarGraphStyle::Heavy:
             barStyle.width  = style::bargraph::rect_axis_length_long_medium;
             barStyle.height = style::bargraph::rect_axis_length_short_medium;
+            barStyle.empty  = 3;
             barStyle.margin = Margins(0, 0, 0, style::bargraph::spacing);
             break;
         case BarGraphStyle::Light:
             barStyle.width  = style::bargraph::rect_axis_length_long_small;
             barStyle.height = style::bargraph::rect_axis_length_short_small;
+            barStyle.empty  = 3;
             barStyle.margin = Margins(0, 0, 0, style::bargraph::spacing);
             break;
         }

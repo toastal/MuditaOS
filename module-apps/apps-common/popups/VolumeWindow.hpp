@@ -48,6 +48,7 @@ namespace gui
       protected:
         Label *volumeText    = nullptr;
         VBarGraph *volumeBar = nullptr;
+        BarGraphStyle style  = BarGraphStyle::Heavy;
 
       public:
         VolumeWindow(app::ApplicationCommon *app, const std::string &name);

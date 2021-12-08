@@ -17,24 +17,22 @@ namespace gui
     void VolumeWindow::addVolumeText()
     {
         volumeText = new Label(this,
-                               style::window::default_left_margin,
-                               style::window::default_vertical_pos,
+                               40,
+                               style::window::default_vertical_pos + 13,
                                style::window::default_body_width,
                                style::window::volume::title_height,
                                utils::translate(style::window::volume::base_title_key));
 
         volumeText->setPenWidth(style::window::default_border_no_focus_w);
-        volumeText->setFont(style::window::font::mediumbold);
+        volumeText->setFont(style::window::font::medium);
         volumeText->setAlignment(gui::Alignment(gui::Alignment::Vertical::Center));
         addWidget(volumeText);
     }
 
     void VolumeWindow::addVolumeBar()
     {
-        volumeBar = new VBarGraph(this,
-                                  style::window::default_left_margin,
-                                  style::window::volume::bar::top_offset,
-                                  style::window::volume::bar::volume_levels);
+        volumeBar = new VBarGraph(
+            this, 40, style::window::volume::bar::top_offset, style::window::volume::bar::volume_levels, style);
     }
 
     void VolumeWindow::buildInterface()
@@ -106,6 +104,20 @@ namespace gui
     {
         if (inputEvent.isShortRelease(KeyCode::KEY_RF)) {
             return false;
+        }
+
+        if (inputEvent.isShortRelease(KeyCode::KEY_ENTER)) {
+
+            removeWidget(volumeBar);
+            delete volumeBar;
+
+            style == BarGraphStyle::Heavy ? style = BarGraphStyle::Light : style = BarGraphStyle::Heavy;
+
+            addVolumeBar();
+            volumeBar->setValue(volume);
+
+            application->refreshWindow(RefreshModes::GUI_REFRESH_DEEP);
+            return true;
         }
 
         return AppWindow::onInput(inputEvent);

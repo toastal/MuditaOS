@@ -73,4 +73,9 @@ namespace gui
         return (left != margins.left || top != margins.top || right != margins.right || bottom != margins.bottom);
     }
 
+    Margins Margins::operator+(const Margins &margins)
+    {
+        return {left + margins.left, top + margins.top, right + margins.right, bottom + margins.bottom};
+    }
+
 } /* namespace gui */

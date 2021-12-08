@@ -8,11 +8,11 @@
 
 namespace style::bargraph
 {
-    constexpr inline auto rect_axis_length_short_medium = 8;
+    constexpr inline auto rect_axis_length_short_medium = 7;
     constexpr inline auto rect_axis_length_long_medium  = 20;
     constexpr inline auto rect_axis_length_short_small  = 3;
     constexpr inline auto rect_axis_length_long_small   = 14;
-    constexpr inline auto spacing                       = 17;
+    constexpr inline auto spacing                       = 20;
     constexpr inline auto radius_medium                 = 4;
     constexpr inline auto radius_small                  = 2;
 
@@ -31,9 +31,10 @@ namespace gui
         Length width{0};
         Length height{0};
         Length radius{0};
+        Length empty{0};
         Margins margin{0, 0, 0, 0};
-        std::function<void(gui::Rect *bar)> fillRender  = nullptr;
-        std::function<void(gui::Rect *bar)> emptyRender = nullptr;
+        std::function<void(gui::Rect *bar, unsigned int i)> fillRender  = nullptr;
+        std::function<void(gui::Rect *bar, unsigned int i)> emptyRender = nullptr;
     };
 
     class BarGraph : public Progress
