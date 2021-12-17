@@ -45,6 +45,14 @@ namespace audio
         }
     }
 
+    std::tuple<int16_t*,std::size_t> Decoder::decode(uint32_t samplesToRead, int16_t *pcmData)
+    {
+        auto rlen = decode_impl(samplesToRead, pcmData) * chanNumber;
+        rlen = resampler.inpSize(rlen);
+        auto [buf,len] = resampler( rlen, pcmData );
+        return { buf, len/chanNumber };
+    }
+
     std::unique_ptr<tags::fetcher::Tags> Decoder::fetchTags()
     {
         return std::make_unique<tags::fetcher::Tags>(tags::fetcher::fetchTags(filePath));
@@ -70,6 +78,10 @@ namespace audio
             return nullptr;
         }
         else {
+            // Configure resampler
+            if( dec->resampler.configure(dec->origSampleRate, dec->sampleRate, dec->chanNumber, workerBufferSize) ) {
+                return nullptr;
+            }
             return dec;
         }
     }

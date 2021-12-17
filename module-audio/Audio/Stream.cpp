@@ -29,16 +29,20 @@ bool Stream::push(const Span &span)
 
     /// sanity - do not store buffers different than internal block size
     if (span.dataSize != _blockSize) {
+        LOG_ERROR("Do not store buffer than internal BS pushed: %i req: %i",(int)span.dataSize, (int)_blockSize);
         return false;
     }
 
     /// write reservation in progress
     if (_dataEnd != _writeReservationPosition) {
+        LOG_ERROR("Write reservation in progress");
         return false;
     }
 
     /// no space left
     if (isFull()) {
+        LOG_ERROR("No space left");
+        return false;
         broadcastEvent(Event::StreamOverflow);
         return false;
     }

@@ -88,12 +88,11 @@ bool audio::DecoderWorker::handleMessage(uint32_t queueID)
 
 void audio::DecoderWorker::pushAudioData()
 {
-    auto samplesRead             = 0;
     const unsigned int readScale = channelMode == ChannelMode::ForceStereo ? 2 : 1;
 
     while (!audioStreamOut->isFull() && playbackEnabled) {
         auto buffer = decoderBuffer.get();
-        samplesRead = decoder->decode(bufferSize / readScale, buffer);
+        auto[outBuf,samplesRead] = decoder->decode(bufferSize / readScale, buffer);
 
         if (samplesRead == 0) {
             endOfFileCallback();
@@ -103,11 +102,13 @@ void audio::DecoderWorker::pushAudioData()
         // pcm mono to stereo force conversion
         if (channelMode == ChannelMode::ForceStereo) {
             for (unsigned int i = bufferSize / 2; i > 0; i--) {
-                buffer[i * 2 - 1] = buffer[i * 2 - 2] = buffer[i - 1];
+                outBuf[i * 2 - 1] = outBuf[i * 2 - 2] = outBuf[i - 1];
             }
         }
 
-        if (!audioStreamOut->push(decoderBuffer.get(), samplesRead * sizeof(BufferInternalType) * readScale)) {
+        auto sz = samplesRead * sizeof(BufferInternalType) * readScale;
+        //if( sz > 2048 ) sz = 2048;
+        if (!audioStreamOut->push(outBuf, sz)) {
             LOG_FATAL("Decoder failed to push to stream.");
             break;
         }

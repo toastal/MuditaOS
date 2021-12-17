@@ -29,7 +29,7 @@ namespace audio
         }
 
         chanNumber = mp3->channels;
-        sampleRate = mp3->sampleRate;
+        setOrigSampleRate(mp3->sampleRate);
         // NOTE: Always convert to S16LE as internal format
         bitsPerSample = 16;
         isInitialized = true;
@@ -43,10 +43,10 @@ namespace audio
     {
         auto totalFramesCount = drmp3_get_pcm_frame_count(mp3.get());
         drmp3_seek_to_pcm_frame(mp3.get(), totalFramesCount * pos);
-        position = float(totalFramesCount) * pos / float(sampleRate);
+        position = float(totalFramesCount) * pos / float(getOrigSampleRate());
     }
 
-    uint32_t decoderMP3::decode(uint32_t samplesToRead, int16_t *pcmData)
+    uint32_t decoderMP3::decode_impl(uint32_t samplesToRead, int16_t *pcmData)
     {
 
         uint32_t samplesRead = 0;
@@ -54,7 +54,7 @@ namespace audio
             drmp3_read_pcm_frames_s16(mp3.get(), samplesToRead / chanNumber, reinterpret_cast<drmp3_int16 *>(pcmData));
 
         if (samplesRead) {
-            position += float(samplesRead) / float(sampleRate);
+            position += float(samplesRead) / float(getOrigSampleRate());
         }
 
         return samplesRead * chanNumber;
