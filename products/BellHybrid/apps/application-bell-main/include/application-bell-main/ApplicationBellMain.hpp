@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "presenters/HomeScreenPresenter.hpp"
+
 #include <Application.hpp>
 #include <common/models/BedtimeModel.hpp>
 
@@ -44,6 +46,9 @@ namespace app
         auto isHomeScreenFocused() -> bool;
         void onStart() override;
         sys::MessagePointer handleSwitchWindow(sys::Message *msgl) override;
+        void setHomeScreenLayout(std::string layoutName);
+
+        std::shared_ptr<app::home_screen::HomeScreenPresenter> homeScreenPresenter{};
     };
 
     template <> struct ManifestTraits<ApplicationBellMain>
