@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include "WorkerEvent.hpp"
@@ -31,6 +31,7 @@ namespace
         }
         else {
             evtmgr::internal::StaticData::get().setCurrentTemperature(*temp);
+            LOG_DEBUG("Current temperature: %f", *temp);
         };
     };
 }
@@ -43,7 +44,13 @@ EventManager::EventManager(LogDumpFunction logDumpFunction, const std::string &n
     buildKeySequences();
     updateTemperature(*temperatureSource);
 
-    onMinuteTick = [this](const time_t) { updateTemperature(*temperatureSource); };
+    temperatureTimerHandle = sys::TimerFactory::createPeriodicTimer(
+        this, "TemperatureTimer", std::chrono::seconds{30}, [this](sys::Timer &) {
+            updateTemperature(*temperatureSource);
+        });
+    temperatureTimerHandle.start();
+
+    // onMinuteTick = [this](const time_t) { updateTemperature(*temperatureSource); };
 }
 
 void EventManager::handleKeyEvent(sys::Message *msg)
