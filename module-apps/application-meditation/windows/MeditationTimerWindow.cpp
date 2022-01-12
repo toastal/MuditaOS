@@ -12,6 +12,7 @@
 #include <Timers/TimerFactory.hpp>
 
 #include <cassert>
+#include <new>
 
 using namespace gui;
 
@@ -98,6 +99,19 @@ void MeditationTimerWindow::onBeforeShow(ShowMode mode, SwitchData *data)
 auto MeditationTimerWindow::onInput(const InputEvent &inputEvent) -> bool
 {
     if (inputEvent.isShortRelease()) {
+        if(inputEvent.is(KeyCode::KEY_0)) {
+            LOG_ERROR("Builtin Trap");
+            __builtin_trap();
+        } else if(inputEvent.is(KeyCode::KEY_1)) {
+            LOG_ERROR("Exception");
+            throw std::bad_alloc();
+        } else if(inputEvent.is(KeyCode::KEY_2)) {
+            LOG_ERROR("Abort");
+            std::abort();
+        } else if(inputEvent.is(KeyCode::KEY_3)) {
+            LOG_ERROR("Exit");
+            std::exit(-2);
+        }
         if (finished) {
             endScreenTimeout.stop();
             application->switchWindow(app::window::name::meditation_main_window);
