@@ -4,6 +4,7 @@
 #include <service-fileindexer/ServiceFileIndexer.hpp>
 
 #include <service-fileindexer/Constants.hpp>
+#include <service-appmgr/messages/UserPowerDownRequest.hpp>
 
 #include <log/log.hpp>
 #include <purefs/filesystem_paths.hpp>
@@ -15,6 +16,15 @@ namespace
         return purefs::createPath(purefs::dir::getUserDiskPath(), "music").string();
     }
 } // namespace
+
+namespace {
+    void xPowerOff(std::shared_ptr<sys::Service> svc)
+    {
+        auto msg = std::make_shared<app::UserPowerDownRequest>();
+        svc->bus.sendUnicast(std::move(msg), service::name::system_manager);
+    }
+}
+
 
 namespace service
 {
@@ -35,7 +45,8 @@ namespace service
     {
         if (mInotifyHandler.init(shared_from_this())) {
             mInotifyHandler.addWatch(getMusicPath());
-
+            // -- //
+            xPowerOff(shared_from_this());
             // Start the initial indexer
             mStartupIndexer.start(shared_from_this(), service::name::file_indexer);
             return sys::ReturnCodes::Success;
