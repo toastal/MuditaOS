@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #pragma once
@@ -70,7 +70,8 @@ namespace settings
 
     namespace Wallpaper
     {
-        constexpr inline auto option = "wallpaper_option";
+        constexpr inline auto wallpaperOption  = "wallpaper_option";
+        constexpr inline auto quoteGroupOption = "wallpaper_quote_group_option";
     } // namespace Wallpaper
 
     namespace Display

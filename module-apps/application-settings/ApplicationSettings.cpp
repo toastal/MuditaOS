@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+﻿// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include <application-settings/ApplicationSettings.hpp>
@@ -455,7 +455,7 @@ namespace app
             return std::make_unique<gui::QuotesOptionsWindow>(app);
         });
         windowsFactory.attach(gui::window::name::edit_quotes, [](ApplicationCommon *app, const std::string &name) {
-            return std::make_unique<gui::EditQuotesWindow>(app);
+            return std::make_unique<gui::EditQuotesWindow>(app, static_cast<ApplicationSettings *>(app));
         });
         windowsFactory.attach(gui::window::name::quote_categories, [](ApplicationCommon *app, const std::string &name) {
             return std::make_unique<gui::QuoteCategoriesWindow>(app);
@@ -697,13 +697,27 @@ namespace app
     auto ApplicationSettings::getWallpaperOption() -> gui::WallpaperOption
     {
         return static_cast<gui::WallpaperOption>(utils::getNumericValue<int>(
-            settings->getValue(::settings::Wallpaper::option, ::settings::SettingsScope::Global)));
+            settings->getValue(::settings::Wallpaper::wallpaperOption, ::settings::SettingsScope::Global)));
     }
 
     void ApplicationSettings::setWallpaperOption(gui::WallpaperOption option)
     {
-        settings->setValue(
-            ::settings::Wallpaper::option, std::to_string(static_cast<int>(option)), ::settings::SettingsScope::Global);
+        settings->setValue(::settings::Wallpaper::wallpaperOption,
+                           std::to_string(static_cast<int>(option)),
+                           ::settings::SettingsScope::Global);
+    }
+
+    auto ApplicationSettings::getQuoteGroupOption() -> gui::QuoteGroupOption
+    {
+        return static_cast<gui::QuoteGroupOption>(utils::getNumericValue<int>(
+            settings->getValue(::settings::Wallpaper::quoteGroupOption, ::settings::SettingsScope::Global)));
+    }
+
+    void ApplicationSettings::setQuoteGroupOption(gui::QuoteGroupOption option)
+    {
+        settings->setValue(::settings::Wallpaper::quoteGroupOption,
+                           std::to_string(static_cast<int>(option)),
+                           ::settings::SettingsScope::Global);
     }
 
     auto ApplicationSettings::getNotificationsWhenLocked() const noexcept -> bool

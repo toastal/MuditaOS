@@ -18,6 +18,7 @@ target_sources(application-settings
         models/display-keypad/QuotesModel.cpp
         models/display-keypad/DisplayModeModel.cpp
         models/display-keypad/WallpaperOptionModel.cpp
+        models/display-keypad/QuoteGroupOptionModel.cpp
         models/network/ApnSettingsModel.cpp
         models/network/NewApnModel.cpp
         models/network/SimContactsImportModel.cpp

@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include "EditQuotesWindow.hpp"
@@ -9,7 +9,9 @@
 
 namespace gui
 {
-    EditQuotesWindow::EditQuotesWindow(app::ApplicationCommon *app) : BaseSettingsWindow(app, window::name::edit_quotes)
+    EditQuotesWindow::EditQuotesWindow(app::ApplicationCommon *app, app::settingsInterface::WallpaperSettings *settings)
+        : BaseSettingsWindow(app, window::name::edit_quotes), optionModel{
+                                                                  std::make_unique<QuoteGroupOptionModel>(settings)}
     {
         setTitle(utils::translate("app_settings_display_wallpaper_edit_quotes"));
     }
@@ -18,27 +20,24 @@ namespace gui
     {
         std::list<gui::Option> optionsList;
 
-        auto addCheckOption = [&](UTF8 text, bool &switcher) {
-            optionsList.emplace_back(std::make_unique<gui::option::OptionSettings>(
-                text,
-                [&](gui::Item &item) mutable {
-                    switchHandler(switcher);
-                    return true;
-                },
-                [=](gui::Item &item) {
-                    if (item.focus) {
-                        this->setNavBarText(utils::translate(style::strings::common::Switch), nav_bar::Side::Center);
-                    }
-                    return true;
-                },
-                this,
-                switcher ? gui::option::SettingRightItem::Checked : gui::option::SettingRightItem::Disabled));
-        };
+        optionsList.emplace_back(std::make_unique<gui::option::OptionSettings>(
+            utils::translate("app_settings_display_wallpaper_quotes_our_favourites"),
+            [&](gui::Item &item) mutable {
+                optionModel->saveValue(QuoteGroupOption::OurFavourites);
+                refreshOptionsList();
+                return true;
+            },
+            [=](gui::Item &item) {
+                if (item.focus) {
+                    this->setNavBarText(utils::translate(style::strings::common::Switch), nav_bar::Side::Center);
+                }
+                return true;
+            },
+            this,
+            optionModel->isCurrentOption(QuoteGroupOption::OurFavourites) ? gui::option::SettingRightItem::Checked
+                                                                          : gui::option::SettingRightItem::Disabled));
 
-        addCheckOption(utils::translate("app_settings_display_wallpaper_quotes_our_favourites"),
-                       isOurFavouritesSwitchOn);
-
-        if (isOurFavouritesSwitchOn) {
+        if (optionModel->isOurFavouritesOptionSelected()) {
             optionsList.emplace_back(std::make_unique<gui::option::OptionSettings>(
                 utils::translate("app_settings_display_wallpaper_quotes_categories"),
                 [=](gui::Item &item) {
@@ -52,12 +51,28 @@ namespace gui
                     return true;
                 },
                 this,
-                gui::option::SettingRightItem::ArrowWhite));
+                gui::option::SettingRightItem::ArrowWhite,
+                true));
         }
 
-        addCheckOption(utils::translate("app_settings_display_wallpaper_quotes_custom"), isCustomSwitchOn);
+        optionsList.emplace_back(std::make_unique<gui::option::OptionSettings>(
+            utils::translate("app_settings_display_wallpaper_quotes_custom"),
+            [&](gui::Item &item) mutable {
+                optionModel->saveValue(QuoteGroupOption::Custom);
+                refreshOptionsList();
+                return true;
+            },
+            [=](gui::Item &item) {
+                if (item.focus) {
+                    this->setNavBarText(utils::translate(style::strings::common::Switch), nav_bar::Side::Center);
+                }
+                return true;
+            },
+            this,
+            optionModel->isCurrentOption(QuoteGroupOption::Custom) ? gui::option::SettingRightItem::Checked
+                                                                   : gui::option::SettingRightItem::Disabled));
 
-        if (isCustomSwitchOn) {
+        if (optionModel->isCustomOptionSelected()) {
             optionsList.emplace_back(std::make_unique<gui::option::OptionSettings>(
                 utils::translate("app_settings_display_wallpaper_edit_quotes"),
                 [=](gui::Item &item) {
@@ -71,19 +86,16 @@ namespace gui
                     return true;
                 },
                 this,
-                gui::option::SettingRightItem::ArrowWhite));
+                gui::option::SettingRightItem::ArrowWhite,
+                true));
         }
 
         return optionsList;
     }
 
-    void EditQuotesWindow::switchHandler(bool &optionSwitch)
+    void EditQuotesWindow::onBeforeShow(ShowMode mode, SwitchData *data)
     {
-        isOurFavouritesSwitchOn = false;
-        isCustomSwitchOn        = false;
-
-        optionSwitch = !optionSwitch;
-
+        optionModel->update();
         refreshOptionsList();
     }
 

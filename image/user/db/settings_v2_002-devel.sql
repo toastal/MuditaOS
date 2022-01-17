@@ -1,4 +1,4 @@
--- Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+-- Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 -- For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 -- ----------- insert default values ----------------------
@@ -40,6 +40,7 @@ INSERT OR IGNORE INTO settings_tab (path, value) VALUES
     ('\EventManager\\br_level', '50.0f'),
     ('keypad_light_state', '0'),
     ('wallpaper_option', '0'),
+    ('wallpaper_quote_group_option', '0'),
     ('gs_current_timezone_name', ''),
     ('gs_current_timezone_rules', ''),
     ('\ServiceTime\\gs_automatic_date_and_time_is_on', '1'),

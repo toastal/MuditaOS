@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #pragma once
@@ -13,6 +13,7 @@
 #include <EventStore.hpp>
 #include <application-settings/models/bluetooth/BluetoothSettingsModel.hpp>
 #include <application-settings/data/WallpaperOption.hpp>
+#include <application-settings/data/QuoteGroupOption.hpp>
 
 class AudioStopNotification; // Forward declaration
 
@@ -71,6 +72,8 @@ namespace app
             virtual ~WallpaperSettings()                                 = default;
             virtual auto getWallpaperOption() -> gui::WallpaperOption    = 0;
             virtual void setWallpaperOption(gui::WallpaperOption option) = 0;
+            virtual auto getQuoteGroupOption() -> gui::QuoteGroupOption    = 0;
+            virtual void setQuoteGroupOption(gui::QuoteGroupOption option) = 0;
         };
 
         class DndSettings
@@ -167,6 +170,8 @@ namespace app
 
         auto getWallpaperOption() -> gui::WallpaperOption override;
         void setWallpaperOption(gui::WallpaperOption option) override;
+        auto getQuoteGroupOption() -> gui::QuoteGroupOption override;
+        void setQuoteGroupOption(gui::QuoteGroupOption option) override;
 
         auto getNotificationsWhenLocked() const noexcept -> bool override;
         void setNotificationsWhenLocked(bool on) noexcept override;

@@ -80,7 +80,7 @@ namespace app::manager
             settings->getValue(settings::SystemProperties::noLockTimeAttemptsLeft, settings::SettingsScope::Global)));
 
         wallpaperModel.setWallpaper(static_cast<gui::WallpaperOption>(utils::getNumericValue<unsigned int>(
-            settings->getValue(settings::Wallpaper::option, settings::SettingsScope::Global))));
+            settings->getValue(settings::Wallpaper::wallpaperOption, settings::SettingsScope::Global))));
 
         settings->registerValueChange(
             settings::SystemProperties::lockScreenPasscodeIsOn,
@@ -107,7 +107,7 @@ namespace app::manager
             settings::SettingsScope::Global);
 
         settings->registerValueChange(
-            settings::Wallpaper::option,
+            settings::Wallpaper::wallpaperOption,
             [this](std::string value) {
                 wallpaperModel.setWallpaper(
                     static_cast<gui::WallpaperOption>(utils::getNumericValue<unsigned int>(value)));
