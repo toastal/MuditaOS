@@ -31,7 +31,9 @@ namespace
         }
         else {
             evtmgr::internal::StaticData::get().setCurrentTemperature(*temp);
-            LOG_DEBUG("Current temperature: %f", *temp);
+            int tempint    = (int)*temp;
+            int tempintdec = (int)((*temp - tempint) * 1000);
+            LOG_INFO("Current temperature: %d, %d", tempint, tempintdec);
         };
     };
 }
