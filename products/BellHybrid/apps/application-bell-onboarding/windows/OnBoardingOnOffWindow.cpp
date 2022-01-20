@@ -134,7 +134,7 @@ namespace gui
 
     void OnBoardingOnOffWindow::powerOff()
     {
-        application->switchWindow(gui::name::window::main_window);
+        application->switchWindow(gui::window::name::onBoardingStartupWindow);
         presenter->powerOff();
     }
 } // namespace gui
