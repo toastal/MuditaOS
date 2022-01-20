@@ -11,6 +11,7 @@ namespace app
 namespace gui::window::name
 {
     inline constexpr auto onBoardingWelcomeWindow     = "BellOnBoardingWelcome";
+    inline constexpr auto onBoardingOnOffWindow       = "BellOnBoardingOnOff";
     inline constexpr auto onBoardingLanguageWindow    = "BellOnBoardingLanguage";
     inline constexpr auto onBoardingSettingsWindow    = "BellOnBoardingSettings";
     inline constexpr auto finalizeOnBoardingWindow    = "BellOnBoardingFinalize";
