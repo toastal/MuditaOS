@@ -1,5 +1,8 @@
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
+// For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
+
 // Check includes, some are not neccessary
-#include "layouts/HomeScreenLayoutClassic.hpp"
+#include <common/layouts/HomeScreenLayoutClassic.hpp>
 #include "data/BellMainStyle.hpp"
 #include "widgets/BellBattery.hpp"
 #include "widgets/DuoHBox.hpp"

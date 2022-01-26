@@ -1,6 +1,6 @@
 #pragma once
 
-#include "layouts/HomeScreenLayoutClassic.hpp"
+#include <common/layouts/HomeScreenLayoutClassic.hpp>
 
 namespace gui
 {

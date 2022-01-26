@@ -1,9 +1,9 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include "application-bell-main/presenters/HomeScreenPresenter.hpp"
 #include "StateController.hpp"
-#include "layouts/BaseHomeScreenLayoutProvider.hpp"
+#include <common/layouts/BaseHomeScreenLayoutProvider.hpp>
 #include "models/BatteryModel.hpp"
 #include "models/TemperatureModel.hpp"
 #include "widgets/ProgressTimerWithSnoozeTimer.hpp"

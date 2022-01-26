@@ -1,12 +1,12 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include "include/application-bell-main/ApplicationBellMain.hpp"
-#include "layouts/BaseHomeScreenLayoutProvider.hpp"
-#include "layouts/HomeScreenLayoutClassic.hpp"
-#include "layouts/HomeScreenLayoutClassicWithAmPm.hpp"
-#include "layouts/HomeScreenLayoutClassicWithBattery.hpp"
-#include "layouts/HomeScreenLayoutClassicWithTemp.hpp"
+#include <common/layouts/BaseHomeScreenLayoutProvider.hpp>
+#include <common/layouts/HomeScreenLayoutClassic.hpp>
+#include <common/layouts/HomeScreenLayoutClassicWithAmPm.hpp>
+#include <common/layouts/HomeScreenLayoutClassicWithBattery.hpp>
+#include <common/layouts/HomeScreenLayoutClassicWithTemp.hpp>
 #include "models/BatteryModel.hpp"
 #include "models/TemperatureModel.hpp"
 

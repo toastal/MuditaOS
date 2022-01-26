@@ -4,7 +4,7 @@
 #pragma once
 
 #include "application-bell-main/presenters/HomeScreenPresenter.hpp"
-#include "layouts/BaseHomeScreenLayoutProvider.hpp"
+#include <common/layouts/BaseHomeScreenLayoutProvider.hpp>
 #include "models/TemperatureModel.hpp"
 #include "widgets/BellBattery.hpp"
 

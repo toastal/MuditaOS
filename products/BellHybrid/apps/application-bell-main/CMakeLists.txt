@@ -26,12 +26,6 @@ target_sources(application-bell-main
         presenters/HomeScreenPresenter.cpp
         presenters/StateController.cpp
 
-        layouts/BaseHomeScreenLayoutProvider.hpp
-        layouts/HomeScreenLayoutClassic.hpp
-        layouts/HomeScreenLayoutClassicWithAmPm.hpp
-        layouts/HomeScreenLayoutClassicWithBattery.hpp
-        layouts/HomeScreenLayoutClassicWithTemp.hpp
-
         widgets/BellBattery.hpp
         widgets/DuoHBox.hpp
         widgets/ProgressTimerWithSnoozeTimer.hpp

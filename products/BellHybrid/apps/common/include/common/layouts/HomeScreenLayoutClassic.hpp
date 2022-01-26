@@ -1,6 +1,6 @@
 #pragma once
 
-#include "layouts/BaseHomeScreenLayoutProvider.hpp"
+#include <common/layouts/BaseHomeScreenLayoutProvider.hpp>
 
 namespace style::homescreen_classic
 {
@@ -34,10 +34,11 @@ namespace gui
         SnoozeIconAndTime,
     };
 
-    namespace battery {
-        constexpr auto chargingLevelHideBot = 100;
+    namespace battery
+    {
+        constexpr auto chargingLevelHideBot    = 100;
         constexpr auto dischargingLevelShowTop = 20;
-    };
+    }; // namespace battery
 
     class HomeScreenLayoutClassic : public BaseHomeScreenLayoutProvider, BellBaseLayout
     {
@@ -67,7 +68,6 @@ namespace gui
         auto setHeaderViewMode(HeaderViewMode mode) -> void;
         virtual auto buildInterface() -> void;
         virtual bool isBatteryVisibilityAllowed(const Store::Battery &batteryContext);
-
 
         TimeSetFmtSpinner *time{};
         DuoHBox *statusBox{};

@@ -1,8 +1,9 @@
-﻿// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+﻿// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include "ApplicationBellSettings.hpp"
 #include "presenter/TimeUnitsPresenter.hpp"
+#include "presenter/LayoutWindowPresenter.hpp"
 #include "models/TemperatureUnitModel.hpp"
 #include "models/AboutYourBellModel.hpp"
 #include "models/alarm_settings/AlarmSettingsListItemProvider.hpp"
@@ -11,12 +12,14 @@
 #include "models/alarm_settings/PrewakeUpSettingsModel.hpp"
 #include "models/alarm_settings/SnoozeListItemProvider.hpp"
 #include "models/alarm_settings/SnoozeSettingsModel.hpp"
+#include "models/LayoutModel.hpp"
 #include "presenter/BedtimeSettingsPresenter.hpp"
 #include "presenter/AboutYourBellWindowPresenter.hpp"
 #include "presenter/alarm_settings/SnoozePresenter.hpp"
 #include "presenter/FrontlightPresenter.hpp"
 #include "windows/AboutYourBellWindow.hpp"
 #include "windows/BellSettingsLanguageWindow.hpp"
+#include "windows/BellSettingsLayoutWindow.hpp"
 #include "windows/BellSettingsFrontlightWindow.hpp"
 #include "windows/alarm_settings/BellSettingsAlarmSettingsMenuWindow.hpp"
 #include "windows/alarm_settings/BellSettingsAlarmSettingsSnoozeWindow.hpp"
@@ -86,6 +89,13 @@ namespace app
             gui::window::name::bellSettingsLanguage, [&](ApplicationCommon *app, const std::string &name) {
                 auto presenter = std::make_unique<bell_settings::LanguageWindowPresenter>(this);
                 return std::make_unique<gui::BellSettingsLanguageWindow>(app, std::move(presenter), name);
+            });
+
+        windowsFactory.attach(
+            gui::window::name::bellSettingsLayout, [this](ApplicationCommon *app, const std::string &name) {
+                auto layoutModel = std::make_unique<bell_settings::LayoutModel>(this);
+                auto presenter   = std::make_unique<bell_settings::LayoutWindowPresenter>(this, std::move(layoutModel));
+                return std::make_unique<gui::BellSettingsLayoutWindow>(app, std::move(presenter), name);
             });
 
         windowsFactory.attach(
