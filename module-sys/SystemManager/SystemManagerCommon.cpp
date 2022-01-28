@@ -57,7 +57,8 @@ namespace sys
 
         namespace regularClose
         {
-            static constexpr std::array whitelist = {service::name::evt_manager, service::name::cellular};
+            static constexpr std::array whitelist = {
+                service::name::eink, service::name::evt_manager, service::name::cellular};
         }
 
         template <typename T> static bool isOnWhitelist(const T &list, const std::string &serviceName)
@@ -369,6 +370,7 @@ namespace sys
                 ++service;
             }
             else {
+                LOG_DEBUG("RequestServiceClose %s", (*service)->GetName().c_str());
                 if (!RequestServiceClose((*service)->GetName(), this)) {
                     LOG_ERROR("Service %s did not respond -> to kill", (*service)->GetName().c_str());
                     kill(*service);
