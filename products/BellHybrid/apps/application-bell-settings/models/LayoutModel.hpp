@@ -5,30 +5,33 @@
 
 #include <common/models/SettingsModel.hpp>
 #include <service-db/Settings.hpp>
-#include <string>
 
-namespace app
+#include <ListItemProvider.hpp>
+#include <apps-common/InternalModel.hpp>
+
+namespace gui
 {
-    class ApplicationCommon;
-}
+    class LayoutClassicWithTempListItem;
+} // namespace gui
 
 namespace app::bell_settings
 {
 
-    class AbstractLayoutModel
+    class LayoutModel : public app::InternalModel<gui::ListItem *>, public gui::ListItemProvider
     {
       public:
-        virtual ~AbstractLayoutModel()       = default;
-        virtual std::string getValue() const = 0;
-    };
+        // explicit LayoutModel(ApplicationCommon *app);
+        // std::string getValue() const;
+        // void setValue(std::string value);
 
-    class LayoutModel : public AbstractLayoutModel
-    {
-      public:
-        explicit LayoutModel(ApplicationCommon *app);
-        std::string getValue() const override;
+        void createData();
 
       private:
-        mutable settings::Settings settings;
+        [[nodiscard]] auto getItem(gui::Order order) -> gui::ListItem * override;
+        [[nodiscard]] auto requestRecordsCount() -> unsigned int override;
+        [[nodiscard]] auto getMinimalItemSpaceRequired() const -> unsigned int override;
+        void requestRecords(uint32_t offset, uint32_t limit) override;
+
+        gui::LayoutClassicWithTempListItem *layoutClassicWithTempItem = nullptr;
     };
 } // namespace app::bell_settings

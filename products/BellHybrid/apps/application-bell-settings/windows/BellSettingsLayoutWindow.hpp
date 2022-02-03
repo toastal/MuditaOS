@@ -12,6 +12,7 @@
 
 namespace gui
 {
+    class SideListView;
     class BellSettingsLayoutWindow : public AppWindow, public app::bell_settings::LayoutWindowContract::View
     {
       public:
@@ -24,7 +25,7 @@ namespace gui
 
       private:
         std::unique_ptr<app::bell_settings::LayoutWindowPresenter::Presenter> presenter;
-
+        SideListView *sideListView = nullptr;
         WidgetSpinner *spinner = nullptr;
     };
 } // namespace gui
