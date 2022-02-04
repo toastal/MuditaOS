@@ -6,6 +6,7 @@
 #include <apps-common/BasePresenter.hpp>
 #include <apps-common/ApplicationCommon.hpp>
 #include "models/LayoutModel.hpp"
+#include <common/layouts/HomeScreenLayouts.hpp>
 
 #include <vector>
 #include <string>
@@ -37,6 +38,8 @@ namespace app::bell_settings
         app::ApplicationCommon *app{};
         std::unique_ptr<AbstractLayoutModel> layoutModel;
         std::vector<std::pair<gui::Item *, const std::string>> layoutOptions;
+        std::unique_ptr<gui::BaseHomeScreenLayoutProvider> layoutClassicWithTemp;
+        std::unique_ptr<gui::BaseHomeScreenLayoutProvider> layoutClassicWithAmPm;
         void initLayoutOptions();
 
       public:

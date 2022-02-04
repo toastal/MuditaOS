@@ -24,7 +24,7 @@ namespace gui
 
       private:
         std::unique_ptr<app::bell_settings::LayoutWindowPresenter::Presenter> presenter;
-
+        BellBaseLayout *body{};
         WidgetSpinner *spinner = nullptr;
     };
 } // namespace gui

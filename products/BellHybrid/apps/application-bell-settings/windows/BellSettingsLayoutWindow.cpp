@@ -33,19 +33,22 @@ namespace gui
         header->setTitleVisibility(false);
         navBar->setVisible(false);
 
+        body = new BellBaseLayout(this, 0, 0, style::window_width, style::window_height, true);
+
         auto layouts = presenter->getLayouts();
         spinner      = new WidgetSpinner(this, {layouts.begin(), layouts.end()}, Boundaries::Fixed);
-        // spinner->setMaximumSize(style::bell_base_layout::w, style::bell_base_layout::center_layout_h);
+        spinner->setMaximumSize(style::window_width, style::window_height);
         // spinner->setFont(style::window::font::large);
-        // spinner->setAlignment(Alignment(Alignment::Horizontal::Center, Alignment::Vertical::Center));
-        // spinner->setFocusEdges(RectangleEdge::None);
+        spinner->setAlignment(Alignment(Alignment::Horizontal::Center, Alignment::Vertical::Center));
+        spinner->setFocusEdges(RectangleEdge::None);
         auto selectedLayout = presenter->getSelectedLayout();
         spinner->setCurrentValue(selectedLayout);
         // spinner->onValueChanged = [this](const auto &) {
 
         // };
-
+        body->getCenterBox()->addWidget(spinner);
         setFocusItem(spinner);
+        body->resize();
     }
 
     bool BellSettingsLayoutWindow::onInput(const InputEvent &inputEvent)

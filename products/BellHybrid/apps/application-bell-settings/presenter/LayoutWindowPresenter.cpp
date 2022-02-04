@@ -6,6 +6,18 @@
 #include <common/layouts/HomeScreenLayouts.hpp>
 #include <apps-common/messages/ChangeHomescreenLayoutMessage.hpp>
 
+constexpr auto alarmTime              = 1000 * 60 * 60 * 12;
+constexpr auto clockTime              = 1000 * 60 * 60 * 12;
+constexpr Store::Battery batteryState = {
+    .levelState = Store::Battery::LevelState::Normal,
+    .state      = Store::Battery::State::Discharging,
+    .level      = 100,
+};
+constexpr utils::temperature::Temperature temperature = {
+    .unit  = utils::temperature::Temperature::Unit::Celsius,
+    .value = 21.0f,
+};
+
 namespace app::bell_settings
 {
     LayoutWindowPresenter::LayoutWindowPresenter(app::ApplicationCommon *app,
@@ -56,7 +68,19 @@ namespace app::bell_settings
     {
         auto layoutGeneratorTemp = gui::homeScreenLayouts.at("ClassicWithTemp");
         auto layoutGeneratorAmPm = gui::homeScreenLayouts.at("ClassicWithAmPm");
-        layoutOptions.push_back({layoutGeneratorTemp()->getLayout(), "ClassicWithTemp"});
-        layoutOptions.push_back({layoutGeneratorAmPm()->getLayout(), "ClassicWithAmPm"});
+        layoutClassicWithTemp    = std::move(layoutGeneratorTemp());
+        layoutClassicWithTemp->setAlarmEdit(false);
+        layoutClassicWithTemp->setAlarmActive(true);
+        layoutClassicWithTemp->setTime(clockTime);
+        // Trzeba pobrać format
+        // layoutTemp->setTimeFormat(timeModel->getTimeFormat());
+        layoutClassicWithTemp->setAlarmTime(alarmTime);
+        layoutClassicWithTemp->setBatteryLevelState(batteryState);
+        layoutClassicWithTemp->setViewState(app::home_screen::ViewState::Activated);
+        layoutClassicWithTemp->setTemperature(temperature);
+
+        layoutClassicWithAmPm = std::move(layoutGeneratorAmPm());
+        layoutOptions.push_back({layoutClassicWithTemp->getLayout(), "ClassicWithTemp"});
+        layoutOptions.push_back({layoutClassicWithAmPm->getLayout(), "ClassicWithAmPm"});
     }
 } // namespace app::bell_settings
