@@ -39,6 +39,15 @@ namespace gui
 
     bool LayoutClassicWithTempListItem::onInput(const InputEvent &inputEvent)
     {
-        return false;
+        bool ret = false;
+        if (inputEvent.isShortRelease()) {
+            if (inputEvent.is(KeyCode::KEY_LEFT)) {
+                ret = true;
+            }
+            else if (inputEvent.is(KeyCode::KEY_RIGHT)) {
+                ret = true;
+            }
+        }
+        return ret;
     }
 } // namespace gui
