@@ -12,6 +12,7 @@
 namespace gui
 {
     class LayoutClassicWithTempListItem;
+    class LayoutClassicWithBatteryListItem;
 } // namespace gui
 
 namespace app::bell_settings
@@ -32,6 +33,7 @@ namespace app::bell_settings
         [[nodiscard]] auto getMinimalItemSpaceRequired() const -> unsigned int override;
         void requestRecords(uint32_t offset, uint32_t limit) override;
 
-        gui::LayoutClassicWithTempListItem *layoutClassicWithTempItem = nullptr;
+        gui::LayoutClassicWithTempListItem *layoutClassicWithTempItem       = nullptr;
+        gui::LayoutClassicWithBatteryListItem *layoutClassicWithBatteryItem = nullptr;
     };
 } // namespace app::bell_settings

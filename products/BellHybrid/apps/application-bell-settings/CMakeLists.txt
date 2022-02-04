@@ -67,6 +67,7 @@ target_sources(application-bell-settings
         windows/alarm_settings/BellSettingsPrewakeUpWindow.cpp
 
         data/LayoutClassicWithTempListItem.cpp
+        data/LayoutClassicWithBatteryListItem.cpp
 
         models/AboutYourBellModel.hpp
         models/FrontlightListItemProvider.hpp
@@ -112,6 +113,7 @@ target_sources(application-bell-settings
 
         data/FinishedWindowMessageData.hpp
         data/LayoutClassicWithTempListItem.hpp
+        data/LayoutClassicWithBatteryListItem.hpp
 
     PUBLIC
         include/application-bell-settings/models/TimeUnitsModel.hpp

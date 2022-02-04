@@ -12,12 +12,12 @@ namespace gui
 {
     class Label;
 
-    class LayoutClassicWithTempListItem : public BellSideListItem
+    class LayoutClassicWithBatteryListItem : public BellSideListItem
     {
-        std::unique_ptr<BaseHomeScreenLayoutProvider> layoutTemp;
+        std::unique_ptr<BaseHomeScreenLayoutProvider> layoutBattery;
         bool onInput(const InputEvent &inputEvent) override;
 
       public:
-        LayoutClassicWithTempListItem();
+        LayoutClassicWithBatteryListItem();
     };
 } // namespace gui

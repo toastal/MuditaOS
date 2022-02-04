@@ -2,6 +2,7 @@
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include <models/LayoutModel.hpp>
+#include "data/LayoutClassicWithBatteryListItem.hpp"
 #include "data/LayoutClassicWithTempListItem.hpp"
 #include <apps-common/ApplicationCommon.hpp>
 #include <db/SystemSettings.hpp>
@@ -35,9 +36,12 @@ namespace app::bell_settings
 
     void LayoutModel::createData()
     {
-        layoutClassicWithTempItem = new gui::LayoutClassicWithTempListItem();
+        layoutClassicWithTempItem    = new gui::LayoutClassicWithTempListItem();
+        layoutClassicWithBatteryItem = new gui::LayoutClassicWithBatteryListItem();
+        internalData.push_back(layoutClassicWithBatteryItem);
         internalData.push_back(layoutClassicWithTempItem);
-        layoutClassicWithTempItem->deleteByList = false;
+        layoutClassicWithTempItem->deleteByList    = false;
+        layoutClassicWithBatteryItem->deleteByList = false;
         // setValue(spinnerDefaultValue);
     }
 } // namespace app::bell_settings
