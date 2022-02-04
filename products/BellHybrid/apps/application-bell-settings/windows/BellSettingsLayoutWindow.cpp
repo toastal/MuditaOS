@@ -4,7 +4,6 @@
 #include "BellSettingsLayoutWindow.hpp"
 #include <common/options/OptionBellMenu.hpp>
 #include <common/layouts/HomeScreenLayouts.hpp>
-#include <SideListView.hpp>
 
 // namespace {
 //         static int layoutNr = 1;
@@ -34,34 +33,28 @@ namespace gui
         header->setTitleVisibility(false);
         navBar->setVisible(false);
 
-        sideListView =
-            new gui::SideListView(this, 0, 0, style::window_width, style::window_height, presenter->getModel());
-
-        presenter->loadData();
-        sideListView->rebuildList(listview::RebuildType::Full);
-        setFocusItem(sideListView);
-        // auto layouts = presenter->getLayouts();
-        // spinner      = new WidgetSpinner(this, {layouts.begin(), layouts.end()}, Boundaries::Fixed);
+        auto layouts = presenter->getLayouts();
+        spinner      = new WidgetSpinner(this, {layouts.begin(), layouts.end()}, Boundaries::Fixed);
         // spinner->setMaximumSize(style::bell_base_layout::w, style::bell_base_layout::center_layout_h);
         // spinner->setFont(style::window::font::large);
         // spinner->setAlignment(Alignment(Alignment::Horizontal::Center, Alignment::Vertical::Center));
         // spinner->setFocusEdges(RectangleEdge::None);
-        // auto selectedLayout = presenter->getSelectedLayout();
-        // spinner->setCurrentValue(selectedLayout);
+        auto selectedLayout = presenter->getSelectedLayout();
+        spinner->setCurrentValue(selectedLayout);
         // spinner->onValueChanged = [this](const auto &) {
 
         // };
 
-        // setFocusItem(spinner);
+        setFocusItem(spinner);
     }
 
     bool BellSettingsLayoutWindow::onInput(const InputEvent &inputEvent)
     {
-        if (sideListView->onInput(inputEvent)) {
+        if (spinner->onInput(inputEvent)) {
             return true;
         }
         else if (inputEvent.isShortRelease(KeyCode::KEY_ENTER)) {
-            // presenter->setLayout(spinner->getCurrentValue());
+            presenter->setLayout(spinner->getCurrentValue());
             // auto name = layouts[(layoutNr++) % layouts.size()];
             // presenter->setLayout(name);
             return true;

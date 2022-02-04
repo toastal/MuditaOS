@@ -93,7 +93,8 @@ namespace app
 
         windowsFactory.attach(
             gui::window::name::bellSettingsLayout, [this](ApplicationCommon *app, const std::string &name) {
-                auto presenter = std::make_unique<bell_settings::LayoutWindowPresenter>(this, settings.get());
+                auto layoutModel = std::make_unique<bell_settings::LayoutModel>(this);
+                auto presenter   = std::make_unique<bell_settings::LayoutWindowPresenter>(this, std::move(layoutModel));
                 return std::make_unique<gui::BellSettingsLayoutWindow>(app, std::move(presenter), name);
             });
 
