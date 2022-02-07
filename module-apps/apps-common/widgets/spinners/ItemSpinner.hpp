@@ -45,6 +45,7 @@ namespace gui
         Policy policy;
         RectangleEdge focusEdges = RectangleEdge::Bottom;
         Orientation orientation  = Orientation::Vertical;
+        gui::Item *currentLayout = nullptr;
     };
 
     template <typename ValuePolicy>
@@ -142,9 +143,12 @@ namespace gui
 
     template <typename Policy> void ItemSpinner<Policy>::update()
     {
-        auto item = policy.get();
+        if (currentLayout) {
+            this->removeWidget(currentLayout);
+        }
+        currentLayout = policy.get();
         // item->parent = this;
-        this->addWidget(item);
+        this->addWidget(currentLayout);
         informContentChanged();
     }
     template <typename Policy> void ItemSpinner<Policy>::invoke()
