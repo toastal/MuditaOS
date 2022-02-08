@@ -1,18 +1,27 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include <SystemManager/CpuSentinel.hpp>
 #include "system/messages/RequestCpuFrequencyMessage.hpp"
 #include "system/Constants.hpp"
+#include <Timers/TimerFactory.hpp>
 #include <memory>
 
 namespace sys
 {
+    namespace
+    {
+        constexpr std::chrono::seconds defaultHoldFrequencyTime{1};
+    } // namespace
 
     CpuSentinel::CpuSentinel(std::string name,
                              sys::Service *service,
                              std::function<void(bsp::CpuFrequencyMHz)> callback)
-        : name(name), owner(service), callback(callback)
+        : name(name), owner(service),
+          callback(callback), timerHandle{sys::TimerFactory::createSingleShotTimer(
+                                  owner, "holdFrequencyTimer", defaultHoldFrequencyTime, [this](sys::Timer &) {
+                                      ReleaseMinimumFrequency();
+                                  })}
     {}
 
     [[nodiscard]] auto CpuSentinel::GetName() const noexcept -> std::string
@@ -26,6 +35,10 @@ namespace sys
             auto msg = std::make_shared<sys::HoldCpuFrequencyMessage>(GetName(), frequencyToHold);
             owner->bus.sendUnicast(std::move(msg), service::name::system_manager);
             currentFrequencyToHold = frequencyToHold;
+        }
+
+        if (timerHandle.isActive()) {
+            timerHandle.stop();
         }
     }
 
@@ -44,6 +57,10 @@ namespace sys
         permanentFrequencyToHold.frequencyToHold = frequencyToHold;
         auto msg = std::make_shared<sys::HoldCpuFrequencyPermanentlyMessage>(GetName(), frequencyToHold);
         owner->bus.sendUnicast(std::move(msg), service::name::system_manager);
+
+        if (timerHandle.isActive()) {
+            timerHandle.stop();
+        }
     }
 
     [[nodiscard]] auto CpuSentinel::GetFrequency() const noexcept -> bsp::CpuFrequencyMHz
@@ -95,6 +112,15 @@ namespace sys
         }
 
         return true;
+    }
+
+    void CpuSentinel::HoldMinimumFrequencyForTime(bsp::CpuFrequencyMHz frequencyToHold,
+                                                  std::chrono::milliseconds timeout)
+    {
+        if (currentFrequencyToHold != frequencyToHold) {
+            HoldMinimumFrequency(frequencyToHold);
+            timerHandle.restart(timeout);
+        }
     }
 
     void CpuSentinel::ReadRegistrationData(bsp::CpuFrequencyMHz frequencyHz, bool permanentFrequency)

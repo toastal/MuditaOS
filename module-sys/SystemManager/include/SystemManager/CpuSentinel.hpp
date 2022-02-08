@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #pragma once
@@ -9,6 +9,7 @@
 #include <string>
 #include <functional>
 #include <atomic>
+#include <Timers/TimerHandle.hpp>
 
 namespace sys
 {
@@ -36,6 +37,7 @@ namespace sys
         bool HoldMinimumFrequencyAndWait(bsp::CpuFrequencyMHz frequencyToHold,
                                          TaskHandle_t taskToNotify,
                                          uint32_t timeout);
+        void HoldMinimumFrequencyForTime(bsp::CpuFrequencyMHz frequencyToHold, std::chrono::milliseconds timeout);
         void ReleaseMinimumFrequency();
 
         void HoldFrequencyPermanently(bsp::CpuFrequencyMHz frequencyToHold);
@@ -59,6 +61,7 @@ namespace sys
         std::function<void(bsp::CpuFrequencyMHz)> callback;
 
         TaskHandle_t taskHandle = nullptr;
+        sys::TimerHandle timerHandle;
     };
 
 } // namespace sys
