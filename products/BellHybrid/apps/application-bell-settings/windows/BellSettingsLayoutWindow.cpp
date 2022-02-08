@@ -4,6 +4,7 @@
 #include "BellSettingsLayoutWindow.hpp"
 #include <common/options/OptionBellMenu.hpp>
 #include <common/layouts/HomeScreenLayouts.hpp>
+#include <common/windows/BellFinishedWindow.hpp>
 
 // namespace {
 //         static int layoutNr = 1;
@@ -53,6 +54,9 @@ namespace gui
         }
         else if (inputEvent.isShortRelease(KeyCode::KEY_ENTER)) {
             presenter->setLayout(spinner->getCurrentValue());
+            application->switchWindow(
+                window::bell_finished::defaultName,
+                BellFinishedWindowData::Factory::create("circle_success_big", gui::name::window::main_window));
             // auto name = layouts[(layoutNr++) % layouts.size()];
             // presenter->setLayout(name);
             return true;

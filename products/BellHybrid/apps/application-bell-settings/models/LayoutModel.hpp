@@ -20,6 +20,7 @@ namespace app::bell_settings
       public:
         virtual ~AbstractLayoutModel()       = default;
         virtual std::string getValue() const = 0;
+        virtual void setValue(const std::string value) const = 0;
     };
 
     class LayoutModel : public AbstractLayoutModel
@@ -27,6 +28,7 @@ namespace app::bell_settings
       public:
         explicit LayoutModel(ApplicationCommon *app);
         std::string getValue() const override;
+        void setValue(const std::string value) const override;
 
       private:
         mutable settings::Settings settings;

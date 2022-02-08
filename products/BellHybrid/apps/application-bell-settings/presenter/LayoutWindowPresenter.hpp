@@ -39,7 +39,7 @@ namespace app::bell_settings
         std::unique_ptr<AbstractLayoutModel> layoutModel;
         std::vector<std::pair<gui::Item *, const std::string>> layoutOptions;
         std::unique_ptr<gui::BaseHomeScreenLayoutProvider> layoutClassicWithTemp;
-        std::unique_ptr<gui::BaseHomeScreenLayoutProvider> layoutClassicWithAmPm;
+        std::unique_ptr<gui::BaseHomeScreenLayoutProvider> layoutClassicWithBattery;
         void initLayoutOptions();
 
       public:

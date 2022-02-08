@@ -55,6 +55,7 @@ namespace app::bell_settings
     {
         for (auto const &option : layoutOptions) {
             if (option.first == selectedLayout) {
+                layoutModel->setValue(option.second);
                 auto layoutChangeRequest = std::make_shared<gui::ChangeHomeScreenLayoutMessage>(option.second);
                 app->bus.sendMulticast(layoutChangeRequest, sys::BusChannel::LayoutChangeRequests);
                 break;
@@ -67,7 +68,7 @@ namespace app::bell_settings
     void LayoutWindowPresenter::initLayoutOptions()
     {
         auto layoutGeneratorTemp = gui::homeScreenLayouts.at("ClassicWithTemp");
-        auto layoutGeneratorAmPm = gui::homeScreenLayouts.at("ClassicWithAmPm");
+        auto layoutGeneratorBattery = gui::homeScreenLayouts.at("ClassicWithBattery");
         layoutClassicWithTemp    = std::move(layoutGeneratorTemp());
         layoutClassicWithTemp->setAlarmEdit(false);
         layoutClassicWithTemp->setAlarmActive(true);
@@ -79,8 +80,17 @@ namespace app::bell_settings
         layoutClassicWithTemp->setViewState(app::home_screen::ViewState::Activated);
         layoutClassicWithTemp->setTemperature(temperature);
 
-        layoutClassicWithAmPm = std::move(layoutGeneratorAmPm());
+        layoutClassicWithBattery = std::move(layoutGeneratorBattery());
+        layoutClassicWithBattery->setAlarmEdit(false);
+        layoutClassicWithBattery->setAlarmActive(true);
+        layoutClassicWithBattery->setTime(clockTime);
+        // Trzeba pobrać format
+        // layoutTemp->setTimeFormat(timeModel->getTimeFormat());
+        layoutClassicWithBattery->setAlarmTime(alarmTime);
+        layoutClassicWithBattery->setBatteryLevelState(batteryState);
+        layoutClassicWithBattery->setViewState(app::home_screen::ViewState::Activated);
+
         layoutOptions.push_back({layoutClassicWithTemp->getLayout(), "ClassicWithTemp"});
-        layoutOptions.push_back({layoutClassicWithAmPm->getLayout(), "ClassicWithAmPm"});
+        layoutOptions.push_back({layoutClassicWithBattery->getLayout(), "ClassicWithBattery"});
     }
 } // namespace app::bell_settings

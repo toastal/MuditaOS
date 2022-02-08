@@ -18,4 +18,9 @@ namespace app::bell_settings
     {
         return settings.getValue(bell::settings::Layout::defaultLayout, settings::SettingsScope::Global);
     }
+
+    void LayoutModel::setValue(const std::string value) const
+    {
+        settings.setValue(bell::settings::Layout::defaultLayout, value, settings::SettingsScope::Global);
+    }
 } // namespace app::bell_settings
