@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include "application-bell-main/presenters/HomeScreenPresenter.hpp"
@@ -153,13 +153,15 @@ namespace app::home_screen
             auto entry = [](AbstractController &controller,
                             AbstractView &view,
                             AbstractTemperatureModel &temperatureModel,
-                            AbstractBatteryModel &batteryModel) {
+                            AbstractBatteryModel &batteryModel,
+                            bell_settings::AbstractFrontlightModel &frontLightModel) {
                 controller.snooze(false);
                 view.setAlarmEdit(false);
                 view.setAlarmActive(false);
                 view.setViewState(ViewState::Deactivated);
                 view.setTemperature(temperatureModel.getTemperature());
                 view.setBatteryLevelState(batteryModel.getLevelState());
+                frontLightModel.setStatus(false);
             };
         } // namespace Deactivated
 
@@ -455,9 +457,11 @@ namespace app::home_screen
              AbstractBatteryModel &batteryModel,
              AbstractTemperatureModel &temperatureModel,
              AbstractAlarmModel &alarmModel,
-             AbstractTimeModel &timeModel)
+             AbstractTimeModel &timeModel,
+             bell_settings::AbstractFrontlightModel &frontLightModel)
             : controller{controller}, view{view}, presenter{presenter}, batteryModel{batteryModel},
-              temperatureModel{temperatureModel}, alarmModel{alarmModel}, timeModel{timeModel}
+              temperatureModel{temperatureModel}, alarmModel{alarmModel}, timeModel{timeModel}, frontLightModel{
+                                                                                                    frontLightModel}
         {
             resetSM();
         }
@@ -484,7 +488,8 @@ namespace app::home_screen
                 batteryModel,
                 temperatureModel,
                 alarmModel,
-                timeModel};
+                timeModel,
+                frontLightModel};
         }
 
         AbstractController &controller;
@@ -494,6 +499,7 @@ namespace app::home_screen
         AbstractTemperatureModel &temperatureModel;
         AbstractAlarmModel &alarmModel;
         AbstractTimeModel &timeModel;
+        bell_settings::AbstractFrontlightModel &frontLightModel;
     };
 
     StateController::StateController(AbstractView &view,
@@ -501,9 +507,10 @@ namespace app::home_screen
                                      AbstractBatteryModel &batteryModel,
                                      AbstractTemperatureModel &temperatureModel,
                                      AbstractAlarmModel &alarmModel,
-                                     AbstractTimeModel &timeModel)
+                                     AbstractTimeModel &timeModel,
+                                     bell_settings::AbstractFrontlightModel &frontLightModel)
         : pimpl{std::make_unique<StateController::Impl>(
-              *this, view, presenter, batteryModel, temperatureModel, alarmModel, timeModel)},
+              *this, view, presenter, batteryModel, temperatureModel, alarmModel, timeModel, frontLightModel)},
           presenter{presenter}
     {}
 

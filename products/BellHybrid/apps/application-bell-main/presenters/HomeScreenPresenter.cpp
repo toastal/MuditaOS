@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include "application-bell-main/presenters/HomeScreenPresenter.hpp"
@@ -23,9 +23,11 @@ namespace app::home_screen
                                              std::unique_ptr<AbstractAlarmModel> alarmModel,
                                              std::unique_ptr<AbstractBatteryModel> batteryModel,
                                              std::unique_ptr<AbstractTemperatureModel> temperatureModel,
-                                             std::unique_ptr<AbstractTimeModel> timeModel)
+                                             std::unique_ptr<AbstractTimeModel> timeModel,
+                                             std::unique_ptr<bell_settings::AbstractFrontlightModel> frontLightModel)
         : app{app}, alarmModel{std::move(alarmModel)}, batteryModel{std::move(batteryModel)},
-          temperatureModel{std::move(temperatureModel)}, timeModel{std::move(timeModel)}
+          temperatureModel{std::move(temperatureModel)}, timeModel{std::move(timeModel)}, frontLightModel{std::move(
+                                                                                              frontLightModel)}
     {}
 
     void HomeScreenPresenter::handleUpdateTimeEvent()
@@ -80,7 +82,7 @@ namespace app::home_screen
     void HomeScreenPresenter::createData()
     {
         stateController = std::make_unique<StateController>(
-            *getView(), *this, *batteryModel, *temperatureModel, *alarmModel, *timeModel);
+            *getView(), *this, *batteryModel, *temperatureModel, *alarmModel, *timeModel, *frontLightModel);
     }
 
     void HomeScreenPresenter::refreshWindow()

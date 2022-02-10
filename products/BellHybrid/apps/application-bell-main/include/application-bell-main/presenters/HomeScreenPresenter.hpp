@@ -1,10 +1,11 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #pragma once
 
 #include <apps-common/BasePresenter.hpp>
 #include <common/models/AbstractAlarmModel.hpp>
+#include <common/models/FrontlightModel.hpp>
 #include <common/layouts/BaseHomeScreenLayoutProvider.hpp>
 #include <common/layouts/HomeScreenLayouts.hpp>
 #include <gui/input/InputEvent.hpp>
@@ -110,7 +111,8 @@ namespace app::home_screen
                             std::unique_ptr<AbstractAlarmModel> alarmModel,
                             std::unique_ptr<AbstractBatteryModel> batteryModel,
                             std::unique_ptr<AbstractTemperatureModel> temperatureModel,
-                            std::unique_ptr<AbstractTimeModel> timeModel);
+                            std::unique_ptr<AbstractTimeModel> timeModel,
+                            std::unique_ptr<bell_settings::AbstractFrontlightModel> frontLightModel);
         virtual ~HomeScreenPresenter();
         HomeScreenPresenter()        = delete;
         HomeScreenPresenter &operator=(const HomeScreenPresenter &oth) = delete;
@@ -148,6 +150,7 @@ namespace app::home_screen
         std::unique_ptr<AbstractBatteryModel> batteryModel;
         std::unique_ptr<AbstractTemperatureModel> temperatureModel;
         std::unique_ptr<AbstractTimeModel> timeModel;
+        std::unique_ptr<bell_settings::AbstractFrontlightModel> frontLightModel;
         std::shared_ptr<AbstractController> stateController;
         std::unique_ptr<ProgressTimerWithSnoozeTimer> snoozeTimer;
 
