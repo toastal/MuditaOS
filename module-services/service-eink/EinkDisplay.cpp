@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include "EinkDisplay.hpp"
@@ -105,13 +105,20 @@ namespace service::eink
 
     EinkStatus_e EinkDisplay::update(std::uint8_t *displayBuffer)
     {
-        return EinkUpdateFrame(pointTopLeft.x,
-                               pointTopLeft.y,
-                               size.width,
-                               size.height,
-                               displayBuffer,
-                               getCurrentBitsPerPixelFormat(),
-                               displayMode);
+        auto initial_time = xTaskGetTickCount();
+        auto ret          = EinkUpdateFrame(pointTopLeft.x,
+                                   pointTopLeft.y,
+                                   size.width,
+                                   size.height,
+                                   displayBuffer,
+                                   getCurrentBitsPerPixelFormat(),
+                                   displayMode);
+
+        auto end_time = xTaskGetTickCount();
+        auto result   = (end_time - initial_time) / portTICK_RATE_MS;
+
+        LOG_ERROR("[Eink update] duration: %lu ms", result);
+        return ret;
     }
 
     EinkBpp_e EinkDisplay::getCurrentBitsPerPixelFormat() const noexcept
@@ -125,7 +132,13 @@ namespace service::eink
     EinkStatus_e EinkDisplay::refresh(EinkDisplayTimingsMode_e refreshMode)
     {
         currentWaveform.useCounter += 1;
-        return EinkRefreshImage(pointTopLeft.x, pointTopLeft.y, size.width, size.height, refreshMode);
+        auto initial_time = xTaskGetTickCount();
+        auto ret          = EinkRefreshImage(pointTopLeft.x, pointTopLeft.y, size.width, size.height, refreshMode);
+        auto end_time     = xTaskGetTickCount();
+        auto result       = (end_time - initial_time) / portTICK_RATE_MS;
+
+        LOG_ERROR("[Eink refresh] duration: %lu ms", result);
+        return ret;
     }
 
     bool EinkDisplay::isNewWaveformNeeded(EinkWaveforms_e newMode, std::int32_t newTemperature) const

@@ -56,7 +56,7 @@ namespace service::eink
                 [this](sys::Message *request) -> sys::MessagePointer { return handlePrepareEarlyRequest(request); });
 
         eInkSentinel = std::make_shared<EinkSentinel>(name::eink, this);
-        display.setEinkSentinel(eInkSentinel);
+        //        display.setEinkSentinel(eInkSentinel);
     }
 
     sys::MessagePointer ServiceEink::DataReceivedHandler(sys::DataMessage *msgl, sys::ResponseMessage *response)
