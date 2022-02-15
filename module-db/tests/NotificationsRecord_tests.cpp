@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include "common.hpp"
@@ -10,7 +10,7 @@
 #include <Databases/NotificationsDB.hpp>
 #include <Databases/ContactsDB.hpp>
 #include <queries/notifications/QueryNotificationsGet.hpp>
-#include <queries/notifications/QueryNotificationsIncrement.hpp>
+#include <queries/notifications/QueryNotificationsUpdateCount.hpp>
 #include <queries/notifications/QueryNotificationsClear.hpp>
 #include <queries/notifications/QueryNotificationsGetAll.hpp>
 
@@ -210,9 +210,9 @@ TEST_CASE("Notifications Record tests")
 
     auto incrementByKey = [&](NotificationsRecord::Key key, const std::string &phoneNumber = "+48500500500") {
         utils::PhoneNumber number(phoneNumber);
-        auto query  = std::make_shared<db::query::notifications::Increment>(key, number.getView());
+        auto query  = std::make_shared<db::query::notifications::UpdateCount>(key, number.getView());
         auto ret    = notificationsRecordInterface.runQuery(query);
-        auto result = dynamic_cast<db::query::notifications::IncrementResult *>(ret.get());
+        auto result = dynamic_cast<db::query::notifications::UpdateCountResult *>(ret.get());
         REQUIRE(result != nullptr);
         REQUIRE(result->getResult());
     };

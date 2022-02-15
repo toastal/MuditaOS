@@ -57,8 +57,8 @@
 #include <log/log.hpp>
 #include <at/UrcFactory.hpp>
 #include <queries/messages/sms/QuerySMSSearchByType.hpp>
-#include <queries/notifications/QueryNotificationsIncrement.hpp>
-#include <queries/notifications/QueryNotificationsMultipleIncrement.hpp>
+#include <queries/notifications/QueryNotificationsUpdateCount.hpp>
+#include <queries/notifications/QueryNotificationsMultipleUpdateCount.hpp>
 #include <projdefs.h>
 #include <service-antenna/AntennaMessage.hpp>
 #include <service-antenna/AntennaServiceAPI.hpp>
@@ -168,7 +168,7 @@ ServiceCellular::ServiceCellular()
         if (DBServiceAPI::CalllogUpdate(this, rec) && rec.type == CallType::CT_MISSED) {
             DBServiceAPI::GetQuery(this,
                                    db::Interface::Name::Notifications,
-                                   std::make_unique<db::query::notifications::Increment>(
+                                   std::make_unique<db::query::notifications::UpdateCount>(
                                        NotificationsRecord::Key::Calls, rec.phoneNumber));
         }
         return true;
@@ -1343,7 +1343,7 @@ void ServiceCellular::onSMSReceived(const utils::PhoneNumber::View &number)
     DBServiceAPI::GetQuery(
         this,
         db::Interface::Name::Notifications,
-        std::make_unique<db::query::notifications::Increment>(NotificationsRecord::Key::Sms, number));
+        std::make_unique<db::query::notifications::UpdateCount>(NotificationsRecord::Key::Sms, number));
 
     bus.sendMulticast(std::make_shared<CellularIncomingSMSNotificationMessage>(),
                       sys::BusChannel::ServiceCellularNotifications);
@@ -2340,7 +2340,7 @@ auto ServiceCellular::logTetheringCalls() -> void
         DBServiceAPI::GetQuery(
             this,
             db::Interface::Name::Notifications,
-            std::make_unique<db::query::notifications::MultipleIncrement>(NotificationsRecord::Key::Calls, numbers));
+            std::make_unique<db::query::notifications::MultipleUpdateCount>(NotificationsRecord::Key::Calls, numbers));
 
         tetheringCalllog.clear();
     }

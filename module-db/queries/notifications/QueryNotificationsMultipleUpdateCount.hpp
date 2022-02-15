@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #pragma once
@@ -10,26 +10,26 @@
 
 namespace db::query::notifications
 {
-    class Increment : public Query
+    class MultipleUpdateCount : public Query
     {
         const NotificationsRecord::Key key;
-        const utils::PhoneNumber::View number;
+        const std::vector<utils::PhoneNumber::View> numbers;
 
       public:
-        Increment(NotificationsRecord::Key key, const utils::PhoneNumber::View &number);
+        MultipleUpdateCount(NotificationsRecord::Key key, const std::vector<utils::PhoneNumber::View> &numbers);
 
         [[nodiscard]] auto getKey() const noexcept -> NotificationsRecord::Key;
-        [[nodiscard]] auto getNumber() const noexcept -> const utils::PhoneNumber::View &;
+        [[nodiscard]] auto getNumbers() const noexcept -> const std::vector<utils::PhoneNumber::View> &;
 
         [[nodiscard]] auto debugInfo() const -> std::string override;
     };
 
-    class IncrementResult : public QueryResult
+    class MultipleUpdateCountResult : public QueryResult
     {
         bool ret;
 
       public:
-        explicit IncrementResult(bool ret);
+        explicit MultipleUpdateCountResult(bool ret);
         [[nodiscard]] auto getResult() const noexcept -> bool;
 
         [[nodiscard]] auto debugInfo() const -> std::string override;

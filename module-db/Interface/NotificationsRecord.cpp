@@ -1,10 +1,10 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include "NotificationsRecord.hpp"
 #include "module-db/queries/notifications/QueryNotificationsGet.hpp"
-#include "module-db/queries/notifications/QueryNotificationsIncrement.hpp"
-#include "module-db/queries/notifications/QueryNotificationsMultipleIncrement.hpp"
+#include "module-db/queries/notifications/QueryNotificationsUpdateCount.hpp"
+#include "module-db/queries/notifications/QueryNotificationsMultipleUpdateCount.hpp"
 #include "module-db/queries/notifications/QueryNotificationsClear.hpp"
 #include "module-db/queries/notifications/QueryNotificationsGetAll.hpp"
 #include "Databases/NotificationsDB.hpp"
@@ -145,10 +145,10 @@ std::unique_ptr<db::QueryResult> NotificationsRecordInterface::runQuery(std::sha
     if (const auto local_query = dynamic_cast<const db::query::notifications::Get *>(query.get())) {
         return runQueryImpl(local_query);
     }
-    if (const auto local_query = dynamic_cast<const db::query::notifications::Increment *>(query.get())) {
+    if (const auto local_query = dynamic_cast<const db::query::notifications::UpdateCount *>(query.get())) {
         return runQueryImpl(local_query);
     }
-    if (const auto local_query = dynamic_cast<const db::query::notifications::MultipleIncrement *>(query.get())) {
+    if (const auto local_query = dynamic_cast<const db::query::notifications::MultipleUpdateCount *>(query.get())) {
         return runQueryImpl(local_query);
     }
     if (const auto local_query = dynamic_cast<const db::query::notifications::Clear *>(query.get())) {
@@ -167,16 +167,16 @@ std::unique_ptr<db::query::notifications::GetResult> NotificationsRecordInterfac
     return std::make_unique<db::query::notifications::GetResult>(std::move(value));
 }
 
-std::unique_ptr<db::query::notifications::IncrementResult> NotificationsRecordInterface::runQueryImpl(
-    const db::query::notifications::Increment *query)
+std::unique_ptr<db::query::notifications::UpdateCountResult> NotificationsRecordInterface::runQueryImpl(
+    const db::query::notifications::UpdateCount *query)
 {
-    auto ret = processIncrement(query->getKey(), query->getNumber(), 1);
+    auto ret = processUpdateCount(query->getKey(), query->getNumber(), query->getCount());
 
-    return std::make_unique<db::query::notifications::IncrementResult>(ret);
+    return std::make_unique<db::query::notifications::UpdateCountResult>(ret);
 }
 
-std::unique_ptr<db::query::notifications::MultipleIncrementResult> NotificationsRecordInterface::runQueryImpl(
-    const db::query::notifications::MultipleIncrement *query)
+std::unique_ptr<db::query::notifications::MultipleUpdateCountResult> NotificationsRecordInterface::runQueryImpl(
+    const db::query::notifications::MultipleUpdateCount *query)
 {
     auto ret            = false;
     const auto &numbers = query->getNumbers();
@@ -187,9 +187,9 @@ std::unique_ptr<db::query::notifications::MultipleIncrementResult> Notifications
             number = std::make_optional(numbers.at(0));
         }
 
-        ret = processIncrement(query->getKey(), std::move(number), numbers.size());
+        ret = processUpdateCount(query->getKey(), std::move(number), numbers.size());
     }
-    return std::make_unique<db::query::notifications::MultipleIncrementResult>(ret);
+    return std::make_unique<db::query::notifications::MultipleUpdateCountResult>(ret);
 }
 
 std::unique_ptr<db::query::notifications::ClearResult> NotificationsRecordInterface::runQueryImpl(
@@ -212,15 +212,15 @@ std::unique_ptr<db::query::notifications::GetAllResult> NotificationsRecordInter
     return std::make_unique<db::query::notifications::GetAllResult>(std::move(records));
 }
 
-bool NotificationsRecordInterface::processIncrement(NotificationsRecord::Key key,
-                                                    std::optional<utils::PhoneNumber::View> &&number,
-                                                    size_t size)
+bool NotificationsRecordInterface::processUpdateCount(NotificationsRecord::Key key,
+                                                      std::optional<utils::PhoneNumber::View> &&number,
+                                                      ssize_t delta)
 {
     auto ret = false;
 
     if (auto record = GetByKey(key); record.isValid() && number.has_value()) {
         auto &currentContactRecord = record.contactRecord;
-        if (size == 1) {
+        if (delta == 1) {
             if (auto numberMatch = contactsDb->MatchByNumber(number.value()); numberMatch.has_value()) {
                 if (record.value == 0) {
                     currentContactRecord = std::move(numberMatch.value().contact);
@@ -234,10 +234,17 @@ bool NotificationsRecordInterface::processIncrement(NotificationsRecord::Key key
                 currentContactRecord.reset();
             }
         }
-        else if (size > 1) {
+        else if (delta > 1 || ((ssize_t(record.value) + delta <= 0))) {
             currentContactRecord.reset();
         }
-        record.value += size;
+
+        if ((ssize_t(record.value) + delta <= 0)) {
+            record.value = 0;
+        }
+        else {
+            record.value += delta;
+        }
+
         ret = Update(record);
     }
 

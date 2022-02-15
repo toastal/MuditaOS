@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #pragma once
@@ -20,10 +20,10 @@ namespace db::query::notifications
 {
     class Get;
     class GetResult;
-    class Increment;
-    class MultipleIncrement;
-    class MultipleIncrementResult;
-    class IncrementResult;
+    class UpdateCount;
+    class MultipleUpdateCount;
+    class MultipleUpdateCountResult;
+    class UpdateCountResult;
     class Clear;
     class ClearResult;
     class GetAll;
@@ -85,13 +85,13 @@ class NotificationsRecordInterface : public RecordInterface<NotificationsRecord,
 
     std::optional<ContactRecord> getContactRecord(uint32_t id) const;
     std::unique_ptr<db::query::notifications::GetResult> runQueryImpl(const db::query::notifications::Get *query);
-    std::unique_ptr<db::query::notifications::IncrementResult> runQueryImpl(
-        const db::query::notifications::Increment *query);
-    std::unique_ptr<db::query::notifications::MultipleIncrementResult> runQueryImpl(
-        const db::query::notifications::MultipleIncrement *query);
+    std::unique_ptr<db::query::notifications::UpdateCountResult> runQueryImpl(
+        const db::query::notifications::UpdateCount *query);
+    std::unique_ptr<db::query::notifications::MultipleUpdateCountResult> runQueryImpl(
+        const db::query::notifications::MultipleUpdateCount *query);
     std::unique_ptr<db::query::notifications::ClearResult> runQueryImpl(const db::query::notifications::Clear *query);
     std::unique_ptr<db::query::notifications::GetAllResult> runQueryImpl(const db::query::notifications::GetAll *query);
-    [[nodiscard]] bool processIncrement(NotificationsRecord::Key key,
-                                        std::optional<utils::PhoneNumber::View> &&number,
-                                        size_t size);
+    [[nodiscard]] bool processUpdateCount(NotificationsRecord::Key key,
+                                          std::optional<utils::PhoneNumber::View> &&number,
+                                          ssize_t size);
 };

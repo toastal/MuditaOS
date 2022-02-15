@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #pragma once
@@ -7,29 +7,32 @@
 #include <Common/Query.hpp>
 #include <string>
 #include <PhoneNumber.hpp>
+#include <cstdint>
 
 namespace db::query::notifications
 {
-    class MultipleIncrement : public Query
+    class UpdateCount : public Query
     {
         const NotificationsRecord::Key key;
-        const std::vector<utils::PhoneNumber::View> numbers;
+        const utils::PhoneNumber::View number;
+        const ssize_t count;
 
       public:
-        MultipleIncrement(NotificationsRecord::Key key, const std::vector<utils::PhoneNumber::View> &numbers);
+        UpdateCount(NotificationsRecord::Key key, const utils::PhoneNumber::View &number, const ssize_t count = 1);
 
         [[nodiscard]] auto getKey() const noexcept -> NotificationsRecord::Key;
-        [[nodiscard]] auto getNumbers() const noexcept -> const std::vector<utils::PhoneNumber::View> &;
+        [[nodiscard]] auto getNumber() const noexcept -> const utils::PhoneNumber::View &;
+        [[nodiscard]] auto getCount() const noexcept -> ssize_t;
 
         [[nodiscard]] auto debugInfo() const -> std::string override;
     };
 
-    class MultipleIncrementResult : public QueryResult
+    class UpdateCountResult : public QueryResult
     {
         bool ret;
 
       public:
-        explicit MultipleIncrementResult(bool ret);
+        explicit UpdateCountResult(bool ret);
         [[nodiscard]] auto getResult() const noexcept -> bool;
 
         [[nodiscard]] auto debugInfo() const -> std::string override;

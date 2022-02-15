@@ -108,8 +108,8 @@ set(SOURCES
         queries/notifications/QueryNotificationsClear.cpp
         queries/notifications/QueryNotificationsGet.cpp
         queries/notifications/QueryNotificationsGetAll.cpp
-        queries/notifications/QueryNotificationsIncrement.cpp
-        queries/notifications/QueryNotificationsMultipleIncrement.cpp
+        queries/notifications/QueryNotificationsUpdateCount.cpp
+        queries/notifications/QueryNotificationsMultipleUpdateCount.cpp
         queries/phonebook/QueryCheckContactsListDuplicates.cpp
         queries/phonebook/QueryContactAdd.cpp
         queries/phonebook/QueryContactGet.cpp
