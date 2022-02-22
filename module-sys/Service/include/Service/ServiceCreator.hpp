@@ -19,7 +19,7 @@ namespace sys
         {}
         virtual ~BaseServiceCreator() noexcept = default;
 
-        [[nodiscard]] virtual std::shared_ptr<Service> create() const = 0;
+        [[nodiscard]] virtual std::shared_ptr<Service> create() = 0;
 
         [[nodiscard]] auto getName() const noexcept -> const ServiceManifest::ServiceName &
         {
@@ -49,9 +49,9 @@ namespace sys
             : BaseServiceCreator(std::move(manifest)), savedArgs(std::make_tuple<Args...>(std::forward<Args>(args)...))
         {}
 
-        [[nodiscard]] auto create() const -> std::shared_ptr<Service> override
+        [[nodiscard]] auto create() -> std::shared_ptr<Service> override
         {
-            return std::apply([](auto... args) { return std::make_shared<T>(std::forward<Args>(args)...); }, savedArgs);
+            return std::apply([](auto&&... args) { return std::make_shared<T>(std::forward<Args>(args)...); }, savedArgs);
         }
 
       private:

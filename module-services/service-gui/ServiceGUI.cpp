@@ -46,7 +46,7 @@ namespace service::gui
     ServiceGUI::ServiceGUI(const std::string &name, std::string parent)
         : sys::Service(name, parent, ServiceGuiStackDepth), commandsQueue{std::make_unique<DrawCommandsQueue>(
                                                                 CommandsQueueCapacity)},
-          currentState{State::NotInitialised}, lastRenderScheduled{false}, waitingForLastRender{false}
+          currentState{State::NotInitialised}, waitingForLastRender{false}
     {
         initAssetManagers();
         registerMessageHandlers();
@@ -63,8 +63,9 @@ namespace service::gui
 
     void ServiceGUI::registerMessageHandlers()
     {
-        connect(typeid(EinkInitialized),
-                [this](sys::Message *request) -> sys::MessagePointer { return handleEinkInitialized(request); });
+        /*        connect(typeid(EinkInitialized),
+                        [this](sys::Message *request) -> sys::MessagePointer { return handleEinkInitialized(request);
+           });*/
 
         connect(typeid(DrawMessage),
                 [this](sys::Message *request) -> sys::MessagePointer { return handleDrawMessage(request); });
@@ -87,11 +88,15 @@ namespace service::gui
 
     sys::ReturnCodes ServiceGUI::InitHandler()
     {
+        contextPool = std::make_unique<ContextPool>(::gui::Size{600, 480}, ContextsCount);
+        setState(State::Idle);
+
         std::list<sys::WorkerQueueInfo> queueInfo{
             {WorkerGUI::SignallingQueueName, WorkerGUI::SignalSize, WorkerGUI::SignallingQueueCapacity}};
         worker = std::make_unique<WorkerGUI>(this);
         worker->init(queueInfo);
         worker->run();
+
         return sys::ReturnCodes::Success;
     }
 
@@ -103,7 +108,12 @@ namespace service::gui
 
     void ServiceGUI::ProcessCloseReason(sys::CloseReason closeReason)
     {
-        waitingForLastRender = true;
+        if (isInState(State::Idle)) {
+            sendCloseReadyMessage(this);
+        }
+        else {
+            waitingForLastRender = true;
+        }
     }
 
     sys::ReturnCodes ServiceGUI::SwitchPowerModeHandler(const sys::ServicePowerMode mode)
@@ -128,7 +138,7 @@ namespace service::gui
             LOG_WARN("Service not yet initialised - ignoring draw commands");
             return std::make_shared<sys::ResponseMessage>(sys::ReturnCodes::Unresolved);
         }
-        if (isInState(State::Suspended) || lastRenderScheduled) {
+        if (isInState(State::Suspended)) {
             LOG_WARN("Ignoring draw commands");
             return std::make_shared<sys::ResponseMessage>(sys::ReturnCodes::Unresolved);
         }
@@ -136,9 +146,6 @@ namespace service::gui
         if (const auto drawMsg = static_cast<DrawMessage *>(message); !drawMsg->commands.empty()) {
             if (drawMsg->isType(DrawMessage::Type::SUSPEND)) {
                 setState(State::Suspended);
-            }
-            else if (drawMsg->isType(DrawMessage::Type::SHUTDOWN)) {
-                lastRenderScheduled = true;
             }
             if (!isAnyFrameBeingRenderedOrDisplayed()) {
                 prepareDisplayEarly(drawMsg->mode);
@@ -245,13 +252,13 @@ namespace service::gui
         contextReleaseTimer.stop();
         setState(State::Idle);
 
+        if (waitingForLastRender) {
+            sendCloseReadyMessage(this);
+        }
         // Even if the next render is already cached, if any context in the pool is currently being processed, then
         // we better wait for it.
-        if (isNextFrameReady() and not isAnyFrameBeingRenderedOrDisplayed()) {
+        else if (isNextFrameReady() and not isAnyFrameBeingRenderedOrDisplayed()) {
             trySendNextFrame();
-        }
-        else if (lastRenderScheduled && waitingForLastRender) {
-            sendCloseReadyMessage(this);
         }
 
         return sys::MessageNone{};

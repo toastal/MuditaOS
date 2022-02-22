@@ -5,6 +5,7 @@
 
 #include <appmgr/IdleHandler.hpp>
 #include <service-appmgr/model/ApplicationManagerCommon.hpp>
+#include <service-appmgr/Constants.hpp>
 
 namespace app::manager
 {
@@ -26,3 +27,17 @@ namespace app::manager
         auto registerMessageHandlers() -> void override;
     };
 } // namespace app::manager
+
+namespace sys
+{
+    template <> struct ManifestTraits<app::manager::ApplicationManager>
+    {
+        static auto GetManifest() -> ServiceManifest
+        {
+            ServiceManifest manifest;
+            manifest.name         = service::name::appmgr;
+            manifest.dependencies = {service::name::db,service::name::gui};
+            return manifest;
+        }
+    };
+} // namespace sys

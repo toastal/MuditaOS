@@ -82,7 +82,24 @@ int main()
     systemServices.emplace_back(sys::CreatorFor<service::eink::ServiceEink>(service::eink::ExitAction::None));
     systemServices.emplace_back(sys::CreatorFor<service::gui::ServiceGUI>());
 
+    // vector with launchers to applications
+    std::vector<std::unique_ptr<app::ApplicationLauncher>> applications;
+    applications.push_back(
+        app::CreateLauncher<app::ApplicationBellMain>(app::applicationBellName, app::Closeable::False));
+    applications.push_back(app::CreateLauncher<app::ApplicationBellSettings>(app::applicationBellSettingsName));
+    applications.push_back(app::CreateLauncher<app::ApplicationBellAlarm>(app::applicationBellAlarmName));
+    applications.push_back(app::CreateLauncher<app::ApplicationBellBedtime>(app::applicationBellBedtimeName));
+    applications.push_back(app::CreateLauncher<app::ApplicationBellPowerNap>(app::applicationBellPowerNapName));
+    applications.push_back(app::CreateLauncher<app::ApplicationBellOnBoarding>(app::applicationBellOnBoardingName));
+    applications.push_back(
+        app::CreateLauncher<app::ApplicationBellBackgroundSounds>(app::applicationBellBackgroundSoundsName));
+    applications.push_back(
+        app::CreateLauncher<app::ApplicationBellMeditationTimer>(app::applicationBellMeditationTimerName));
+
+    systemServices.emplace_back(sys::CreatorFor<app::manager::ApplicationManager>(service::name::appmgr, std::move(applications), app::applicationBellName));
+
     auto sysmgr = std::make_shared<sys::SystemManager>(std::move(systemServices));
+
     sysmgr->StartSystem(
         [&platform]() {
             try {
@@ -100,27 +117,7 @@ int main()
             i18n::phonenumbers::PhoneNumberUtil::GetInstance();
             return true;
         },
-        [sysmgr]() {
-            // vector with launchers to applications
-            std::vector<std::unique_ptr<app::ApplicationLauncher>> applications;
-            applications.push_back(
-                app::CreateLauncher<app::ApplicationBellMain>(app::applicationBellName, app::Closeable::False));
-            applications.push_back(app::CreateLauncher<app::ApplicationBellSettings>(app::applicationBellSettingsName));
-            applications.push_back(app::CreateLauncher<app::ApplicationBellAlarm>(app::applicationBellAlarmName));
-            applications.push_back(app::CreateLauncher<app::ApplicationBellBedtime>(app::applicationBellBedtimeName));
-            applications.push_back(app::CreateLauncher<app::ApplicationBellPowerNap>(app::applicationBellPowerNapName));
-            applications.push_back(
-                app::CreateLauncher<app::ApplicationBellOnBoarding>(app::applicationBellOnBoardingName));
-            applications.push_back(
-                app::CreateLauncher<app::ApplicationBellBackgroundSounds>(app::applicationBellBackgroundSoundsName));
-            applications.push_back(
-                app::CreateLauncher<app::ApplicationBellMeditationTimer>(app::applicationBellMeditationTimerName));
-            // start application manager
-            return sysmgr->RunSystemService(
-                std::make_shared<app::manager::ApplicationManager>(
-                    service::name::appmgr, std::move(applications), app::applicationBellName),
-                sysmgr.get());
-        },
+        {},
         [&platform] {
             try {
                 LOG_DEBUG("System deinit");

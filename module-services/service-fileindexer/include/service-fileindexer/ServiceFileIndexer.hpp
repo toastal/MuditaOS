@@ -4,6 +4,7 @@
 #pragma once
 
 #include <Service/Service.hpp>
+#include <service-db/DBServiceName.hpp>
 
 #include "Constants.hpp"
 #include "StartupIndexer.hpp"
@@ -40,6 +41,7 @@ namespace sys
         {
             ServiceManifest manifest;
             manifest.name = service::name::file_indexer;
+            manifest.dependencies = {service::name::db};
             return manifest;
         }
     };

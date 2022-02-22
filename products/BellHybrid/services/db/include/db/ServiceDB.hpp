@@ -43,9 +43,6 @@ namespace sys
         {
             ServiceManifest manifest;
             manifest.name = service::name::db;
-#if ENABLE_FILEINDEXER_SERVICE
-            manifest.dependencies = {service::name::file_indexer.data()};
-#endif
             manifest.timeout = std::chrono::minutes{1};
             return manifest;
         }

@@ -15,6 +15,7 @@
 #include <Timers/TimerHandle.hpp>
 
 #include <service-db/DBServiceName.hpp>
+#include <service-eink/ServiceEink.hpp>
 
 #include <cstdint>
 #include <memory>
@@ -82,7 +83,6 @@ namespace service::gui
         RenderCache cache;
         sys::TimerHandle contextReleaseTimer;
         State currentState;
-        bool lastRenderScheduled;
         bool waitingForLastRender;
     };
 } // namespace service::gui
@@ -95,7 +95,7 @@ namespace sys
         {
             ServiceManifest manifest;
             manifest.name         = service::name::gui;
-            manifest.dependencies = {service::name::db};
+            manifest.dependencies = {service::name::db,service::name::eink};
             return manifest;
         }
     };
