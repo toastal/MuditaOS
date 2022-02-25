@@ -65,7 +65,7 @@ namespace sys
 
         namespace regularClose
         {
-            static constexpr std::array whitelist = {service::name::evt_manager};
+            static constexpr std::array whitelist = {""};
         }
 
         template <typename T> static bool isOnWhitelist(const T &list, const std::string &serviceName)
@@ -146,7 +146,6 @@ namespace sys
     {
         initialize();
 
-        // in shutdown we need to wait till event manager tells us that it's ok to stfu
         while (state == State::Running) {
             if (auto msg = mailbox.pop(); msg) {
                 msg->Execute(this);
@@ -157,7 +156,6 @@ namespace sys
             handleShutdown();
         }
 
-        DestroySystemService(service::name::evt_manager, this);
         CloseService();
 
         // it should be called before systemDeinit to make sure this log is dumped to the file

@@ -96,7 +96,7 @@ int main()
     applications.push_back(
         app::CreateLauncher<app::ApplicationBellMeditationTimer>(app::applicationBellMeditationTimerName));
 
-    systemServices.emplace_back(sys::CreatorFor<app::manager::ApplicationManager>(service::name::appmgr, std::move(applications), app::applicationBellName));
+    systemServices.emplace_back(sys::CreatorFor<app::manager::ApplicationManager>(std::move(service::name::appmgr), std::move(applications), std::move(app::applicationBellName)));
 
     auto sysmgr = std::make_shared<sys::SystemManager>(std::move(systemServices));
 
