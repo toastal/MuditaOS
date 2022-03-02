@@ -1,28 +1,20 @@
-﻿// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+﻿// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #pragma once
 
 #include <endpoints/Endpoint.hpp>
-
-#include <Service/Service.hpp>
-
-#include <string>
+#include <endpoints/deviceInfo/DeviceInfoEndpointCommon.hpp>
 
 namespace sdesktop::endpoints
 {
-
-    class DeviceInfoEndpoint : public Endpoint
+    class DeviceInfoEndpoint : public DeviceInfoEndpointCommon
     {
-        auto getSerialNumber() -> std::string;
-
       public:
-        explicit DeviceInfoEndpoint(sys::Service *ownerServicePtr) : Endpoint(ownerServicePtr)
-        {
-            debugName = "DeviceInfoEndpoint";
-        }
-        auto handle(Context &context) -> void override;
-        auto getDeviceInfo(Context &context) -> bool;
+        explicit DeviceInfoEndpoint(sys::Service *ownerServicePtr) : DeviceInfoEndpointCommon(ownerServicePtr)
+        {}
+
+        auto getDeviceInfo(Context &context) -> http::Code override;
     };
 
 } // namespace sdesktop::endpoints

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+﻿// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #pragma once
@@ -37,7 +37,8 @@ namespace sdesktop
     inline constexpr auto RECEIVE_QUEUE_BUFFER_NAME = "receiveQueueBuffer";
     inline constexpr auto SEND_QUEUE_BUFFER_NAME    = "sendQueueBuffer";
     inline constexpr auto IRQ_QUEUE_BUFFER_NAME     = "irqQueueBuffer";
-
+    inline constexpr auto DeviceUniqueIdLength      = 32;
+    inline constexpr auto DeviceUniqueIdName        = "sd_device_unique_id";
 }; // namespace sdesktop
 
 namespace sdesktop::bluetooth
@@ -77,8 +78,13 @@ class ServiceDesktop : public sys::Service
 
     auto getSerialNumber() const -> std::string;
     auto getCaseColour() const -> std::string;
+    auto getDeviceToken() -> std::string;
 
   private:
+    auto getDeviceUniqueId() const -> std::string;
+    void generateDeviceUniqueId();
+    void setDeviceUniqueId(const std::string &token);
+
     std::unique_ptr<sdesktop::USBSecurityModel> usbSecurityModel;
     std::unique_ptr<settings::Settings> settings;
     std::unique_ptr<sdesktop::bluetooth::BluetoothMessagesHandler> btMsgHandler;
