@@ -9,7 +9,7 @@
 namespace
 {
     inline constexpr auto arrowsWidth      = 580U;
-    inline constexpr auto arrowsLeftMargin = 10U;
+    inline constexpr auto arrowsLeftMargin = 15U;
 } // namespace
 
 namespace gui
