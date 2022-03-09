@@ -50,10 +50,6 @@ namespace sys
 
         TickType_t lastRefreshTimestamp = 0;
         bool timeout_occurred           = false;
-
-        static_assert(sizeof(lastRefreshTimestamp) == 4 && alignof(decltype(lastRefreshTimestamp)) == 4,
-                      "SystemWatchdog::lastRefreshTimestamp must be 32-bit long and properly aligned otherwise data "
-                      "races may occur");
     };
 
 } // namespace sys

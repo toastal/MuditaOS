@@ -37,7 +37,7 @@ function(add_image)
         set(UPDATER_FILE_PATH "")
     endif()
 
-    set(COMMAND_DEPENDS "genlittlefs")
+    #TODO:M.p set(COMMAND_DEPENDS "genlittlefs")
     list(APPEND COMMAND_DEPENDS ${SCRIPT_PATH})
     if(_ARG_ASSETS)
         list(APPEND COMMAND_DEPENDS ${_ARG_ASSETS})

@@ -38,7 +38,6 @@ target_link_libraries(application-bell-meditation-timer
         bell::audio
         bell::app-common
         bell::app-main
-        bellgui
         service-appmgr
         service-time
     PUBLIC

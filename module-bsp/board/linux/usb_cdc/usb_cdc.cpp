@@ -6,7 +6,7 @@
 #include <fcntl.h>
 #include <fstream>
 #include <string>
-#include <sys/inotify.h>
+// TODO:M.P #include <sys/inotify.h>
 #include <array>
 #include <limits.h>
 
@@ -55,6 +55,8 @@ namespace bsp
 
     void checkUsbStatus()
     {
+        // TODO:M.P
+#if 0
         char eventsBuff[((sizeof(inotify_event) + NAME_MAX + 1))];
         int len = read(fdNofity, eventsBuff, ((sizeof(inotify_event) + NAME_MAX + 1)));
         if (len > 0) {
@@ -68,6 +70,7 @@ namespace bsp
                 xQueueSend(USBIrqQueue, &notification, 0);
             }
         }
+#endif
     }
 
     int usbCDCReceive(void *)
@@ -137,11 +140,11 @@ namespace bsp
         }
     }
 
-    void writePtsToFile(const char *pts_name)
+    void writePtsToFile(const char *ptsName)
     {
         std::ofstream ptsNameFile;
         ptsNameFile.open(ptsFileName, std::ios::out | std::ios::trunc);
-        ptsNameFile << pts_name;
+        ptsNameFile << ptsName;
     }
 
     void usbDeinit()
@@ -178,9 +181,11 @@ namespace bsp
             LOG_ERROR("bsp::usbInit ptsname returned NULL, no pseudo terminal allocated");
             return -1;
         }
-
+        // TODO:M.P
+#if 0
         fdNofity = inotify_init1(O_NONBLOCK);
         inotify_add_watch(fdNofity, pts_name, IN_OPEN | IN_CLOSE_WRITE);
+#endif
 
         writePtsToFile(pts_name);
         LOG_INFO("bsp::usbInit linux ptsname: %s", pts_name);

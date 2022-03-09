@@ -29,7 +29,7 @@ function(add_assets_target)
         COMMAND rsync -qravu --delete ${EXCLUDED}
             ${_ASSETS_SOURCE_DIR}/user
             ${_ASSETS_DEST_DIR}
-        COMMAND find ${_ASSETS_DEST_DIR} -name "*-devel*" | sed "\"s,\\(.*\\)-devel\\(.*\\),& \\1\\2,\"" | xargs --no-run-if-empty -L1 mv
+        COMMAND find ${_ASSETS_DEST_DIR} -name "*-devel*" | sed "\"s,\\(.*\\)-devel\\(.*\\),& \\1\\2,\"" | xargs -L1 mv
         COMMENT
             "Copying assets.. (${_ASSETS_TARGET})"
     )

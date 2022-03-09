@@ -20,6 +20,19 @@ if [[ ( $# -ne 3 ) && ( $# -ne 6 ) ]]; then
 	exit -1
 fi
 
+realpath() {
+  OURPWD=$PWD
+  cd "$(dirname "$1")"
+  LINK=$(readlink "$(basename "$1")")
+  while [ "$LINK" ]; do
+    cd "$(dirname "$LINK")"
+    LINK=$(readlink "$(basename "$1")")
+  done
+  REALPATH="$PWD/$(basename "$1")"
+  cd "$OURPWD"
+  echo "$REALPATH"
+}
+
 IMAGE_NAME=$(realpath $1)
 PRODUCT_NAME=$(basename -s .img $1)
 IMAGE_PARTITIONS=$(realpath $2)

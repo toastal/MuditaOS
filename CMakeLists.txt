@@ -7,6 +7,18 @@ set(MUDITA_CACHE_DIR "~/.mudita/" CACHE STRING "cache directory for our download
 project(PureOS)
 enable_language(C CXX ASM)
 
+include_directories(
+        "/opt/homebrew/include"
+        /opt/homebrew/lib
+        "/opt/homebrew/include/glib-2.0"
+        /opt/homebrew/lib/glib-2.0/include
+        /opt/homebrew/lib/pangomm-1.4/include
+        /opt/homebrew/opt/pango/include/pango-1.0/pango
+        /opt/homebrew/Cellar/gtk+3/3.24.33/include/gtk-3.0
+
+        )
+link_directories("/opt/homebrew/lib")
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 
 include(Product)

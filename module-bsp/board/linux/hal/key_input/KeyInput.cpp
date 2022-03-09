@@ -6,7 +6,8 @@
 #include <hal/GenericFactory.hpp>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <sys/epoll.h>
+#include <sys/poll.h>
+#include <unistd.h>
 
 namespace hal::key_input
 {
@@ -37,36 +38,20 @@ namespace hal::key_input
 
     void LinuxKeyInput::worker()
     {
-        constexpr static auto maxEvents   = 1U;
         constexpr auto *keyFifo           = "/tmp/myfifo3";
         constexpr auto keyFifoPermissions = 0666;
 
-        struct epoll_event event
+        struct pollfd fd
         {};
-        struct epoll_event events[maxEvents];
-
-        const auto epollFd = epoll_create1(0);
-        if (epollFd == -1) {
-            fprintf(stderr, "Failed to create epoll file descriptor\n");
-            assert(0);
-        }
 
         mkfifo(keyFifo, keyFifoPermissions);
-        const auto fd = open(keyFifo, O_RDONLY | O_NONBLOCK);
-        event.events  = EPOLLIN;
-        event.data.fd = fd;
-
-        if (epoll_ctl(epollFd, EPOLL_CTL_ADD, fd, &event)) {
-            fprintf(stderr, "Failed to add file descriptor to epoll\n");
-            close(epollFd);
-            assert(0);
-        }
+        fd.fd     = open(keyFifo, O_RDONLY | O_NONBLOCK);
+        fd.events = POLLIN;
 
         while (shouldRun) {
-            const auto eventCount = epoll_wait(epollFd, events, maxEvents, 1000);
-            for (auto i = 0; i < eventCount; ++i) {
+            if (const auto ret = poll(&fd, 1, 1000); ret > 0) {
                 std::uint8_t buff[16]{};
-                const auto bytesRead = read(events[i].data.fd, buff, sizeof buff);
+                const auto bytesRead = read(fd.fd, buff, sizeof buff);
                 if (bytesRead > 1) {
                     keyEvents.clear();
                     consumeBytes(buff, bytesRead);
@@ -76,8 +61,7 @@ namespace hal::key_input
                 }
             }
         }
-        close(fd);
-        close(epollFd);
+        close(fd.fd);
         vTaskDelete(nullptr);
     }
 

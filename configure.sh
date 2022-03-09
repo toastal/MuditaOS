@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
 # For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
@@ -7,6 +7,14 @@ if [[ $BASH_VERSINFO -lt 4 ]]; then
     echo "your is: ${BASH_VERSINFO}"
     exit 4
 fi
+
+function get_proc_count(){
+if [[ $(uname) == 'Darwin'* ]]; then
+  echo `sysctl -n hw.logicalcpu`
+  else
+    echo `nproc`
+fi
+}
 
 function help() {
     echo -e "Use this script for faster configuring build types"
@@ -130,7 +138,7 @@ if validate_product_selection && check_target && check_build_type ; then
         if $CMAKE_CMD; then
             Ninja=$(echo $@ | grep "Ninja")
             if [[ -z ${Ninja} ]]; then
-                echo -e "\e[32mcd ${BUILD_DIR} && make -j $(nproc) <Pure|Bell>\e[0m"
+                echo -e "\e[32mcd ${BUILD_DIR} && make -j $(get_proc_count) <Pure|Bell>\e[0m"
             else
                 echo -e "\e[32mcd ${BUILD_DIR} && ninja <Pure|Bell>\e[0m"
             fi

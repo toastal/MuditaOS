@@ -10,11 +10,6 @@ STANDARD_OPTIONS="-v `pwd`:${PURE_HOME} --user \"$(id -u):$(id -g)\" --env HOME=
 
 RCFILE="/home/docker/.bashrc"
 
-if [[ $BASH_VERSINFO -lt 4 ]]; then
-    echo "Please update your bash to at least version 4"
-	echo "your is: ${BASH_VERSINFO}"
-    exit 4
-fi
 
 function help() {
     cat <<- MSGEND

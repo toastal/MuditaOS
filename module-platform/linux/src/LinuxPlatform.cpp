@@ -6,7 +6,7 @@
 #include "BlockDeviceFactory.hpp"
 
 #include <bsp/bsp.hpp>
-#include <iosyscalls.hpp>
+//TODO:M.P #include <iosyscalls.hpp>
 #include <purefs/vfs_subsystem.hpp>
 #include <filesystem>
 #include <exception>
@@ -38,7 +38,7 @@ void LinuxPlatform::initFilesystem()
         throw std::runtime_error("Filesystem already initialized");
     }
 
-    iosyscalls_set_image_name(imageName.c_str());
+    //TODO:M.P iosyscalls_set_image_name(imageName.c_str());
 
     auto blockDeviceFactory = std::make_unique<BlockDeviceFactory>(imageName);
     vfs                     = purefs::subsystem::initialize(std::move(blockDeviceFactory));

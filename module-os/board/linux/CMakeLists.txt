@@ -5,6 +5,7 @@ target_sources(module-os
 target_sources(
         module-os
     PRIVATE
+		utils/wait_for_event.c
         port.c 
         fsl_runtimestat_gpt.c
 )

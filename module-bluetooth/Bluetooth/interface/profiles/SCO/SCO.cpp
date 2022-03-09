@@ -153,7 +153,7 @@ void SCO::SCOImpl::writeToHostEndian(int16_t *buffer, uint8_t *packet, int lengt
 void SCO::SCOImpl::receiveCvsd(uint8_t *packet, uint16_t size)
 {
 
-    std::array<int16_t, AUDIO_BUFFER_LENGTH> audioFrameOut;
+    std::array<int16_t, AUDIO_BUFFER_LENGTH> audioFrameOut{};
 
     if (size > audioFrameOut.size()) {
         LOG_WARN("SCO packet larger than local output buffer - dropping data.");
@@ -163,7 +163,7 @@ void SCO::SCOImpl::receiveCvsd(uint8_t *packet, uint16_t size)
     const int audioBytesRead = size - PACKET_DATA_OFFSET;
     const int numSamples     = audioBytesRead / BYTES_PER_FRAME;
 
-    std::array<int16_t, AUDIO_BUFFER_LENGTH> audioFrameIn;
+    std::array<int16_t, AUDIO_BUFFER_LENGTH> audioFrameIn{};
     writeToHostEndian(audioFrameIn.data(), packet, numSamples);
 
     // treat packet as bad frame if controller does not report 'all good'
