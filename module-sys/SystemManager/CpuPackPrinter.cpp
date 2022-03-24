@@ -8,6 +8,8 @@
 #include "battery_charger/battery_charger.hpp"
 #include "time/time_conversion.hpp"
 
+#include "third-party/segger/rtt/SEGGER_RTT.h"
+
 namespace sys::cpu::stats
 {
 
@@ -34,9 +36,9 @@ namespace sys::cpu::stats
                                               {"time", data[i].exec_time},
                                               {"id", uint8_t(PackID::Proc)}};
 
-                LOG_PRINTF("\n%c%s\n", 2, obj.dump().c_str());
+                SEGGER_RTT_Write(1, obj.dump().c_str(), obj.dump().size());
             }
-            LOG_PRINTF("\n%c%s\n", 2, procEnd.dump().c_str());
+            SEGGER_RTT_Write(1, procEnd.dump().c_str(), procEnd.dump().size());
         }
         xTaskResumeAll();
     }
@@ -51,7 +53,8 @@ namespace sys::cpu::stats
                                       {"avgA", int32_t(bsp::battery_charger::getAvgCurrent())},
                                       {"nowA", int32_t(bsp::battery_charger::getCurrentMeasurement())},
                                       {"ts", static_cast<uint64_t>(utils::time::getCurrentTimestamp().getTime())}};
-        LOG_PRINTF("\n%c%s\n", 2, obj.dump().c_str());
+
+        SEGGER_RTT_Write(1, obj.dump().c_str(), obj.dump().size());
     }
 
     void PackPrinter::printPowerConsumption()
@@ -60,6 +63,6 @@ namespace sys::cpu::stats
                                       {"avgA", int32_t(bsp::battery_charger::getAvgCurrent())},
                                       {"nowA", int32_t(bsp::battery_charger::getCurrentMeasurement())},
                                       {"ts", static_cast<uint64_t>(utils::time::getCurrentTimestamp().getTime())}};
-        LOG_PRINTF("\n%c%s\n", 2, obj.dump().c_str());
+        SEGGER_RTT_Write(1, obj.dump().c_str(), obj.dump().size());
     }
 } // namespace sys::cpu::stats
