@@ -57,7 +57,7 @@ namespace sys
             printer->printSysUsage(data, data_size);
 #endif
         }
-        printer->printPowerConsumption();
+        // printer->printPowerConsumption();
         StoreSysUsage();
     }
 
