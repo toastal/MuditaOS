@@ -54,11 +54,11 @@ namespace sys
         if (ret.changed != sys::cpu::algorithm::Change::NoChange) {
             printer->printCPUChange(ret);
 #if PROF_ON
+            StoreSysUsage();
             printer->printSysUsage(data, data_size);
 #endif
         }
         // printer->printPowerConsumption();
-        StoreSysUsage();
     }
 
     void CpuStatistics::UpdatePercentageCpuLoad()

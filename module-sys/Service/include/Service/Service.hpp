@@ -248,6 +248,7 @@ namespace sys
         } timers;
 
         MessagePointer currentlyProcessing = nullptr;
+        MessagePointer lastResponse        = nullptr;
 
       public:
         auto getTimers() -> auto &

@@ -98,7 +98,12 @@ namespace sys
     {
         if (auto msg = mailbox.pop(); msg) {
             const bool respond  = msg->type != Message::Type::Response && GetName() != msg->sender;
-            currentlyProcessing = msg;
+            if (msg->type != Message::Type::Response) {
+                currentlyProcessing = msg;
+            }
+            //  else {
+            //      lastResponse = msg;
+            //  }
             auto response       = msg->Execute(this);
             if (response == nullptr || !respond) {
                 return;
@@ -255,7 +260,15 @@ namespace sys
 
     std::string Service::getCurrentProcessing()
     {
-        return currentlyProcessing ? std::string(typeid(*currentlyProcessing).name()) : "nothing in progress";
+        if (currentlyProcessing) {
+            std::string data =
+                "req: " +
+                std::string(
+                    typeid(*currentlyProcessing).name()); //  + ", resp: " + std::string(typeid(*lastResponse).name());
+            return data;
+        }
+        currentlyProcessing = nullptr;
+        return "nothing in progress";
     }
 
     auto Proxy::handleMessage(Service *service, Message *message, ResponseMessage *response) -> MessagePointer

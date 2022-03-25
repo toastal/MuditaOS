@@ -35,8 +35,8 @@ namespace sys::cpu
                                                 cpu::AlgorithmData &data,
                                                 AlgoID *used)
     {
-        for (auto id : algorithms) {
-            if (auto algo = get(id); algo != nullptr) {
+        for (const auto &id : algorithms) {
+            if (const auto &algo = get(id); algo != nullptr) {
                 if (auto result = algo->calculate(data); result.change != sys::cpu::algorithm::Change::NoChange) {
                     if (used != nullptr) {
                         *used = id;

@@ -1,6 +1,7 @@
 // Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
+#include "SystemManager/cpu/algorithm/FrequencyDown.hpp"
 #include "SystemManager/cpu/algorithm/FrequencyHold.hpp"
 #include "SystemManager/cpu/algorithm/ImmediateUpscale.hpp"
 #include "SystemManager/cpu/algorithm/FrequencyStepping.hpp"
@@ -13,32 +14,6 @@
 
 namespace sys
 {
-    namespace
-    {
-        constexpr auto lowestLevelName{"lowestCpuFrequency"};
-        constexpr auto middleLevelName{"middleCpuFrequency"};
-        constexpr auto highestLevelName{"highestCpuFrequency"};
-    } // namespace
-
-    CpuFrequencyMonitor::CpuFrequencyMonitor(const std::string name) : levelName(name)
-    {}
-
-    [[nodiscard]] auto CpuFrequencyMonitor::GetName() const noexcept -> std::string
-    {
-        return levelName;
-    }
-
-    [[nodiscard]] auto CpuFrequencyMonitor::GetRuntimePercentage() const noexcept -> std::uint32_t
-    {
-        auto tickCount = xTaskGetTickCount();
-        return tickCount == 0 ? 0 : ((totalTicksCount * 100) / tickCount);
-    }
-
-    void CpuFrequencyMonitor::IncreaseTicks(TickType_t ticks)
-    {
-        totalTicksCount += ticks;
-    }
-
     PowerManager::PowerManager(CpuStatistics &stats) : powerProfile{bsp::getPowerProfile()}, cpuStatistics(stats)
     {
         driverSEMC      = drivers::DriverSEMC::Create(drivers::name::ExternalRAM);
@@ -49,10 +24,7 @@ namespace sys
         cpuAlgorithms->emplace(sys::cpu::AlgoID::ImmediateUpscale, std::make_unique<sys::cpu::ImmediateUpscale>());
         cpuAlgorithms->emplace(sys::cpu::AlgoID::FrequencyStepping,
                                std::make_unique<sys::cpu::FrequencyStepping>(powerProfile, *cpuGovernor));
-
-        cpuFrequencyMonitor.push_back(CpuFrequencyMonitor(lowestLevelName));
-        cpuFrequencyMonitor.push_back(CpuFrequencyMonitor(middleLevelName));
-        cpuFrequencyMonitor.push_back(CpuFrequencyMonitor(highestLevelName));
+        cpuAlgorithms->emplace(sys::cpu::AlgoID::FrequencyDown, std::make_unique<sys::cpu::FrequencyDown>());
     }
 
     PowerManager::~PowerManager()
@@ -99,15 +71,20 @@ namespace sys
             retval.data         = data.sentinel;
         });
 
-        auto algorithms = {
-            sys::cpu::AlgoID::FrequencyHold, sys::cpu::AlgoID::ImmediateUpscale, sys::cpu::AlgoID::FrequencyStepping};
+        auto algorithms = {// sys::cpu::AlgoID::FrequencyHold,
+                           sys::cpu::AlgoID::ImmediateUpscale,
+                           // sys::cpu::AlgoID::FrequencyStepping,
+                           sys::cpu::AlgoID::FrequencyDown};
 
         auto result    = cpuAlgorithms->calculate(algorithms, data, &retval.id);
-        retval.changed = result.change;
         if (result.change == cpu::algorithm::Change::NoChange or result.change == cpu::algorithm::Change::Hold) {
             return retval;
         }
+        retval.changed = result.change;
         SetCpuFrequency(result.value);
+        LOG_INFO("=> algorithm: %s : %s",
+                 magic_enum::enum_name(retval.id).data(),
+                 magic_enum::enum_name<bsp::CpuFrequencyMHz>(result.value).data());
         cpuAlgorithms->reset(algorithms);
         return retval;
     }
@@ -156,44 +133,19 @@ namespace sys
 
     void PowerManager::SetCpuFrequency(bsp::CpuFrequencyMHz freq)
     {
-        UpdateCpuFrequencyMonitor(lowPowerControl->GetCurrentFrequencyLevel());
+        int i = 0;
         while (lowPowerControl->GetCurrentFrequencyLevel() != freq) {
+            i++;
             lowPowerControl->SetCpuFrequency(freq);
+            // TODO test me!
             cpuGovernor->InformSentinelsAboutCpuFrequencyChange(freq);
         }
+        LOG_INFO("set in: %d", i);
     }
 
     [[nodiscard]] auto PowerManager::getExternalRamDevice() const noexcept -> std::shared_ptr<devices::Device>
     {
         return driverSEMC;
-    }
-
-    void PowerManager::UpdateCpuFrequencyMonitor(bsp::CpuFrequencyMHz currentFreq)
-    {
-        auto ticks     = xTaskGetTickCount();
-        auto levelName = currentFreq == powerProfile.minimalFrequency
-                             ? lowestLevelName
-                             : (currentFreq == bsp::CpuFrequencyMHz::Level_6 ? highestLevelName : middleLevelName);
-
-        for (auto &level : cpuFrequencyMonitor) {
-            if (level.GetName() == levelName) {
-                level.IncreaseTicks(ticks - lastCpuFrequencyChangeTimestamp);
-            }
-        }
-
-        lastCpuFrequencyChangeTimestamp = ticks;
-    }
-
-    void PowerManager::LogPowerManagerEfficiency()
-    {
-        std::string log{"PowerManager Efficiency: "};
-        UpdateCpuFrequencyMonitor(lowPowerControl->GetCurrentFrequencyLevel());
-
-        for (auto &level : cpuFrequencyMonitor) {
-            log.append(level.GetName() + ": " + std::to_string(level.GetRuntimePercentage()) + "% ");
-        }
-
-        LOG_INFO("%s", log.c_str());
     }
 
     void PowerManager::SetBootSuccess()

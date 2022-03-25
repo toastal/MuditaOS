@@ -240,10 +240,6 @@ namespace sys
             this, "cpuTick", constants::timerInitInterval, [this](sys::Timer &) { FreqUpdateTick(); });
         freqTimer.start();
 
-        powerManagerEfficiencyTimer = sys::TimerFactory::createPeriodicTimer(
-            this, "logPowerManagerEfficiency", constants::powerManagerLogsTimerInterval, [this](sys::Timer &) {
-                powerManager->LogPowerManagerEfficiency();
-            });
         powerManagerEfficiencyTimer.start();
     }
 
@@ -421,7 +417,7 @@ namespace sys
     std::string SystemManagerCommon::ServiceProcessor(const uint32_t &t)
     {
         if (t == 0) {
-            return "Idle";
+            return "IDLE";
         }
 
         auto foo = [](auto &l, const uint32_t &t) {
@@ -770,6 +766,7 @@ namespace sys
             freqTimer.restart(constants::timerPeriodInterval);
         }
 
+        // cpuStatistics->UpdatePercentageCpuLoad();
         auto ret = powerManager->UpdateCpuFrequency();
         cpuStatistics->TrackChange(ret);
     }

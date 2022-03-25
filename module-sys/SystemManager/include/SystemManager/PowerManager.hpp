@@ -22,20 +22,6 @@ namespace sys
 {
     class CpuStatistics;
 
-    class CpuFrequencyMonitor
-    {
-      public:
-        explicit CpuFrequencyMonitor(const std::string name);
-
-        [[nodiscard]] auto GetName() const noexcept -> std::string;
-        [[nodiscard]] auto GetRuntimePercentage() const noexcept -> std::uint32_t;
-        void IncreaseTicks(TickType_t ticks);
-
-      private:
-        std::string levelName;
-        std::uint64_t totalTicksCount{0};
-    };
-
     class PowerManager
     {
       public:
@@ -65,18 +51,13 @@ namespace sys
         void SetPernamentFrequency(bsp::CpuFrequencyMHz freq);
         void ResetPernamentFrequency();
 
-        void LogPowerManagerEfficiency();
         void SetBootSuccess();
 
       private:
         void ResetFrequencyShiftCounter();
         void SetCpuFrequency(bsp::CpuFrequencyMHz freq);
 
-        void UpdateCpuFrequencyMonitor(bsp::CpuFrequencyMHz currentFreq);
-
         TickType_t lastCpuFrequencyChangeTimestamp{0};
-
-        std::vector<CpuFrequencyMonitor> cpuFrequencyMonitor;
 
         std::shared_ptr<drivers::DriverSEMC> driverSEMC;
         std::unique_ptr<bsp::LowPowerMode> lowPowerControl;

@@ -38,9 +38,9 @@ namespace sys::cpu::stats
 
                 SEGGER_RTT_Write(1, obj.dump().c_str(), obj.dump().size());
             }
-            SEGGER_RTT_Write(1, procEnd.dump().c_str(), procEnd.dump().size());
         }
         xTaskResumeAll();
+        SEGGER_RTT_Write(1, procEnd.dump().c_str(), procEnd.dump().size());
     }
 
     void PackPrinter::printCPUChange(const cpu::UpdateResult &ret)

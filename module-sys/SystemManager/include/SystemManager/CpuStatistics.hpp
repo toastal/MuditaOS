@@ -26,9 +26,9 @@ namespace sys
         void StoreSysUsage();
         [[nodiscard]] uint32_t GetPercentageCpuLoad();
         void TrackChange(const cpu::UpdateResult &ret);
+        void UpdatePercentageCpuLoad();
 
       private:
-        void UpdatePercentageCpuLoad();
         /// used to print stored data in CpuStatistics on change
         std::unique_ptr<cpu::stats::Printer> printer;
         uint32_t ComputeIncrease(uint32_t currentCount, uint32_t lastCount) const;

@@ -28,6 +28,7 @@ target_sources(sys-manager
         cpu/algorithm/FrequencyHold.cpp
         cpu/algorithm/ImmediateUpscale.cpp
         cpu/algorithm/FrequencyStepping.cpp
+        cpu/algorithm/FrequencyDown.cpp
 )
 
 target_include_directories(sys-manager

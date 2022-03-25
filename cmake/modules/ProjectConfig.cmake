@@ -83,5 +83,9 @@ set(PROJECT_CONFIG_DEFINITIONS
         CACHE INTERNAL ""
         )
 
+if (${DISABLE_WATCHDOG})
+    list(APPEND PROJECT_CONFIG_DEFINITIONS DISABLE_WATCHDOG=1)
+endif()
+
 message(STATUS "BlueKitchen selected")
 set(BT_STACK "BlueKitchen")

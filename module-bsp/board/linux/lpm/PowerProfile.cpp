@@ -9,8 +9,8 @@ namespace bsp
     {
         PowerProfile linuxPowerProfile;
 
-        linuxPowerProfile.frequencyShiftLowerThreshold      = 40;
-        linuxPowerProfile.frequencyShiftUpperThreshold      = 60;
+        linuxPowerProfile.frequencyShiftLowerThreshold      = 30;
+        linuxPowerProfile.frequencyShiftUpperThreshold      = 80;
         linuxPowerProfile.maxBelowThresholdCount            = 30;
         linuxPowerProfile.maxBelowThresholdInRowCount       = 10;
         linuxPowerProfile.maxAboveThresholdCount            = 3;
