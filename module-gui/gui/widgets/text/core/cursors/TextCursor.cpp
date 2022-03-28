@@ -4,6 +4,7 @@
 #include "TextCursor.hpp"
 #include <Text.hpp>
 
+#include <cassert>
 #include <log/log.hpp>
 
 #if DEBUG_GUI_TEXT_CURSOR == 1

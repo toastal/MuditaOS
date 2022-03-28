@@ -11,6 +11,7 @@ target_sources(
         bsp/bluetooth/Bluetooth.cpp
         bsp/cellular/bsp_cellular.cpp
         bsp/common.cpp
+        bsp/key_to_cstr.cpp
         bsp/lpm/bsp_lpm.cpp
         devices/Device.cpp
         devices/power/CW2015.cpp

@@ -1,9 +1,9 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #pragma once
 
-#include <magic_enum.hpp>
+#include <cstdint>
 
 using KeyNotificationSource = uint16_t;
 
@@ -62,7 +62,4 @@ namespace bsp
     };
 } // namespace bsp
 
-inline const char *c_str(bsp::KeyCodes code)
-{
-    return magic_enum::enum_name(code).data();
-}
+const char *c_str(bsp::KeyCodes code);
