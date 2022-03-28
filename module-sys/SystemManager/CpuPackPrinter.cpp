@@ -10,6 +10,10 @@
 
 #include "third-party/segger/rtt/SEGGER_RTT.h"
 
+#ifndef SEGGER_RTT_Write
+#define SEGGER_RTT_Write(...)
+#endif
+
 namespace sys::cpu::stats
 {
 

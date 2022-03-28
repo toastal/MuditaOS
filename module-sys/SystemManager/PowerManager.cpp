@@ -24,7 +24,7 @@ namespace sys
         cpuAlgorithms->emplace(sys::cpu::AlgoID::ImmediateUpscale, std::make_unique<sys::cpu::ImmediateUpscale>());
         cpuAlgorithms->emplace(sys::cpu::AlgoID::FrequencyStepping,
                                std::make_unique<sys::cpu::FrequencyStepping>(powerProfile, *cpuGovernor));
-        cpuAlgorithms->emplace(sys::cpu::AlgoID::FrequencyDown, std::make_unique<sys::cpu::FrequencyDown>());
+        //         cpuAlgorithms->emplace(sys::cpu::AlgoID::FrequencyDown, std::make_unique<sys::cpu::FrequencyDown>());
     }
 
     PowerManager::~PowerManager()
@@ -71,10 +71,12 @@ namespace sys
             retval.data         = data.sentinel;
         });
 
-        auto algorithms = {// sys::cpu::AlgoID::FrequencyHold,
-                           sys::cpu::AlgoID::ImmediateUpscale,
-                           // sys::cpu::AlgoID::FrequencyStepping,
-                           sys::cpu::AlgoID::FrequencyDown};
+        auto algorithms = {
+            // sys::cpu::AlgoID::FrequencyHold,
+            sys::cpu::AlgoID::ImmediateUpscale,
+            sys::cpu::AlgoID::FrequencyStepping,
+            // sys::cpu::AlgoID::FrequencyDown
+        };
 
         auto result    = cpuAlgorithms->calculate(algorithms, data, &retval.id);
         if (result.change == cpu::algorithm::Change::NoChange or result.change == cpu::algorithm::Change::Hold) {
