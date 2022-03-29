@@ -766,8 +766,8 @@ namespace sys
             freqTimer.restart(constants::timerPeriodInterval);
         }
 
-        // cpuStatistics->UpdatePercentageCpuLoad();
-        auto ret = powerManager->UpdateCpuFrequency();
+        cpuStatistics->UpdatePercentageCpuLoad();
+        auto ret = powerManager->UpdateCpuFrequency(1);
         cpuStatistics->TrackChange(ret);
     }
 

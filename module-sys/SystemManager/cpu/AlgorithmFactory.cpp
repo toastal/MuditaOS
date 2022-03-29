@@ -50,7 +50,7 @@ namespace sys::cpu
 
     void AlgorithmFactory::reset(const std::list<sys::cpu::AlgoID> &algorithms)
     {
-        for (auto again : algorithms) {
+        for (const auto &again : algorithms) {
             if (auto al = get(again); al != nullptr) {
                 al->reset();
             }

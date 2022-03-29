@@ -13,16 +13,14 @@ namespace sys
 
 namespace sys::cpu
 {
-    class FrequencyStepping : public Algorithm
+    class FrequencySteppingDown : public Algorithm
     {
         const bsp::PowerProfile &powerProfile;
-        CpuGovernor &cpuGovernor;
-        unsigned int aboveThresholdCounter = 0;
         unsigned int belowThresholdCounter = 0;
         bool isFrequencyLoweringInProgress = true;
 
       public:
-        FrequencyStepping(const bsp::PowerProfile &powerProfile, CpuGovernor &cpuGovernor);
+        explicit FrequencySteppingDown(const bsp::PowerProfile &powerProfile);
         [[nodiscard]] AlgorithmResult calculateImplementation(const AlgorithmData &data) override;
         void resetImplementation() override;
     };

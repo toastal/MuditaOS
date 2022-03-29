@@ -40,6 +40,8 @@ namespace sys::cpu
 
         class PackPrinter : public Printer
         {
+            bool sysTsSent = false;
+
           public:
             void printSysUsage(struct task_prof_data *data, size_t size) override;
             void printCPUChange(const cpu::UpdateResult &ret) override;

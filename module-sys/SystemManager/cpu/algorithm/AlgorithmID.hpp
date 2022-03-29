@@ -10,7 +10,8 @@ namespace sys::cpu
         None,
         FrequencyHold,
         ImmediateUpscale,
-        FrequencyStepping,
+        FrequencySteppingUp,
         FrequencyDown,
+        FrequencySteppingDown,
     };
 }

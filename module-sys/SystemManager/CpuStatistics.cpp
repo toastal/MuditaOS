@@ -79,7 +79,6 @@ namespace sys
 
     uint32_t CpuStatistics::GetPercentageCpuLoad()
     {
-        UpdatePercentageCpuLoad();
         return cpuLoad;
     }
 

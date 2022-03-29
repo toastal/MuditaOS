@@ -39,7 +39,7 @@ namespace sys
         /// limit (frequencyShiftUpperThreshold), CPU frequency is increased; if for the last 'maxBelowThresholdCount'
         /// periods the current CPU usage was below the lower limit (frequencyShiftLowerThreshold), CPU frequency is
         /// reduced frequency
-        [[nodiscard]] cpu::UpdateResult UpdateCpuFrequency();
+        [[nodiscard]] cpu::UpdateResult UpdateCpuFrequency(int cause);
 
         [[nodiscard]] auto getExternalRamDevice() const noexcept -> std::shared_ptr<devices::Device>;
 

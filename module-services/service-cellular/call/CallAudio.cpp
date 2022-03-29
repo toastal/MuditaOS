@@ -34,8 +34,10 @@ void CallRingAudio::play()
 void CallRingAudio::stop()
 {
     if (not started) {
+        AudioServiceAPI::StopAll(&owner);
         return;
     }
+    started = false;
     owner.sync(meta->async);
     AudioServiceAPI::StopAll(&owner);
 }
