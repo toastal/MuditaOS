@@ -70,6 +70,7 @@ sys::ReturnCodes ServiceBluetooth::InitHandler()
     bluetooth::KeyStorage::settings = settingsHolder;
 
     bus.channels.push_back(sys::BusChannel::BluetoothNotifications);
+    bus.channels.push_back(sys::BusChannel::ServiceCellularNotifications);
 
     worker = std::make_unique<BluetoothWorker>(this);
     worker->run();
@@ -109,6 +110,8 @@ sys::ReturnCodes ServiceBluetooth::InitHandler()
     connectHandler<message::bluetooth::ResponseAuthenticatePairCancel>();
     connectHandler<CellularCallerIdMessage>();
     connectHandler<CellularCallActiveNotification>();
+    connectHandler<CellularSignalStrengthUpdateNotification>();
+    connectHandler<CellularCurrentOperatorNameNotification>();
 
     settingsHolder->onStateChange = [this]() {
         auto initialState = std::visit(bluetooth::IntVisitor(), settingsHolder->getValue(bluetooth::Settings::State));
@@ -469,7 +472,7 @@ auto ServiceBluetooth::handle(CellularCallerIdMessage *msg) -> std::shared_ptr<s
 {
     auto number = msg->number;
     auto btOn   = std::visit(bluetooth::BoolVisitor(), settingsHolder->getValue(bluetooth::Settings::State));
-    LOG_ERROR("Received caller ID msg! ");
+    LOG_DEBUG("Received caller ID msg! ");
 
     if (btOn) {
         LOG_DEBUG("Sending to profile!");
@@ -482,6 +485,20 @@ auto ServiceBluetooth::handle(CellularCallerIdMessage *msg) -> std::shared_ptr<s
 auto ServiceBluetooth::handle(CellularCallActiveNotification *msg) -> std::shared_ptr<sys::Message>
 {
     sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::CallAnswered));
+    return std::make_shared<sys::ResponseMessage>();
+}
+
+auto ServiceBluetooth::handle(CellularSignalStrengthUpdateNotification *msg) -> std::shared_ptr<sys::Message>
+{
+    auto bars = Store::GSM::get()->getSignalStrength().rssiBar;
+    LOG_INFO("Bluetooth: RSSI %d/5", static_cast<int>(bars));
+    return std::make_shared<sys::ResponseMessage>();
+}
+
+auto ServiceBluetooth::handle(CellularCurrentOperatorNameNotification *msg) -> std::shared_ptr<sys::Message>
+{
+    auto opName = msg->getCurrentOperatorName();
+    LOG_INFO("Bluetooth: Operator name: %s", opName.c_str());
     return std::make_shared<sys::ResponseMessage>();
 }
 

@@ -59,6 +59,8 @@ namespace message::bluetooth
 
 class CellularCallerIdMessage;
 class CellularCallActiveNotification;
+class CellularSignalStrengthUpdateNotification;
+class CellularCurrentOperatorNameNotification;
 
 class ServiceBluetooth : public sys::Service
 {
@@ -119,6 +121,8 @@ class ServiceBluetooth : public sys::Service
     [[nodiscard]] auto handle(message::bluetooth::ResponseAuthenticatePairCancel *msg) -> std::shared_ptr<sys::Message>;
     [[nodiscard]] auto handle(CellularCallerIdMessage *msg) -> std::shared_ptr<sys::Message>;
     [[nodiscard]] auto handle(CellularCallActiveNotification *msg) -> std::shared_ptr<sys::Message>;
+    [[nodiscard]] auto handle(CellularSignalStrengthUpdateNotification *msg) -> std::shared_ptr<sys::Message>;
+    [[nodiscard]] auto handle(CellularCurrentOperatorNameNotification *msg) -> std::shared_ptr<sys::Message>;
 };
 
 namespace sys
