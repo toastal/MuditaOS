@@ -20,6 +20,11 @@ extern "C"
 #include "btstack_util.h"
 }
 
+namespace Store
+{
+    class SignalStrength;
+};
+
 namespace bluetooth
 {
 
@@ -45,6 +50,9 @@ namespace bluetooth
         auto initializeCall() -> Error::Code;
         auto callAnswered() -> Error::Code;
         auto setIncomingCallNumber(const utils::PhoneNumber::View &num) -> Error::Code;
+        auto setSignalStrengthData(const Store::SignalStrength &num) -> Error::Code;
+        auto setOperatorNameData(const std::string_view &name) -> Error::Code;
+
         auto setAudioDevice(std::shared_ptr<BluetoothAudioDevice> device) -> Error::Code;
 
       private:

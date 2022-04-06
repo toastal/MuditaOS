@@ -20,7 +20,7 @@ TEST_CASE("Command data handling test")
     };
 
     {
-        auto data    = std::make_shared<PhoneNumberData>(number);
+        auto data          = std::make_shared<PhoneNumberData>(number);
         auto commandToSend = bluetooth::Command(Command::Type::PowerOn, std::move(data));
         queueSimulator(&commandToSend, &commandReceivedFromQueue);
     }

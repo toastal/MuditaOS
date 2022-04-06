@@ -127,5 +127,21 @@ namespace bluetooth
         LOG_ERROR("No profile, returning!");
         return Error::NotReady;
     }
+    auto ProfileManager::setSignalStrengthData(const Store::SignalStrength &num) -> Error::Code
+    {
+        if (currentProfilePtr) {
+            return currentProfilePtr->setSignalStrength(static_cast<int>(num.rssiBar));
+        }
+        LOG_ERROR("No profile, returning!");
+        return Error::NotReady;
+    }
+    auto ProfileManager::setOperatorNameData(const std::string_view &name) -> Error::Code
+    {
+        if (currentProfilePtr) {
+            return currentProfilePtr->setOperatorName(name);
+        }
+        LOG_ERROR("No profile, returning!");
+        return Error::NotReady;
+    }
 
 } // namespace bluetooth

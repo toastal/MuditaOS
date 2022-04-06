@@ -78,6 +78,10 @@ namespace bluetooth
             return profileManager->callAnswered();
         case Command::IncomingCallNumber:
             return profileManager->setIncomingCallNumber(std::get<utils::PhoneNumber::View>(command.getData()));
+        case Command::SignalStrengthData:
+            return profileManager->setSignalStrengthData(std::get<Store::SignalStrength>(command.getData()));
+        case Command::OperatorNameData:
+            return profileManager->setOperatorNameData(std::get<std::string>(command.getData()));
         case Command::StartStream:
             profileManager->start();
             return Error::Success;

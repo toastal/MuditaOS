@@ -30,6 +30,8 @@ namespace bluetooth
             SwitchProfile,
             CallAnswered,
             IncomingCallNumber,
+            SignalStrengthData,
+            OperatorNameData,
             None,
         };
 

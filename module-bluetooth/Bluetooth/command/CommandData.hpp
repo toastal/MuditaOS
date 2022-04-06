@@ -6,17 +6,18 @@
 #include <variant>
 #include <PhoneNumber.hpp>
 #include "Device.hpp"
+#include "EventStore.hpp"
 
 namespace bluetooth
 {
-    using DataVariant = std::variant<int, Devicei, utils::PhoneNumber::View>;
+    using DataVariant = std::variant<std::string, Store::SignalStrength, Devicei, utils::PhoneNumber::View>;
 
     class CommandData
     {
       public:
-        virtual auto getData() -> DataVariant                          = 0;
-        virtual auto clone() -> CommandData                          * = 0;
-        virtual ~CommandData()                                         = default;
+        virtual auto getData() -> DataVariant = 0;
+        virtual auto clone() -> CommandData * = 0;
+        virtual ~CommandData()                = default;
 
       protected:
         CommandData()                    = default;

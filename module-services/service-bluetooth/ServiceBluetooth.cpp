@@ -23,6 +23,7 @@
 #include "service-bluetooth/messages/Ring.hpp"
 #include "service-bluetooth/BluetoothDevicesModel.hpp"
 #include "service-bluetooth/messages/BluetoothModeChanged.hpp"
+#include "service-bluetooth/messages/RequestCellularData.hpp"
 
 #include "system/messages/SentinelRegistrationMessage.hpp"
 
@@ -42,6 +43,8 @@
 #include <service-cellular/CellularMessage.hpp>
 #include <command/PhoneNumberData.hpp>
 #include <command/DeviceData.hpp>
+#include <command/SignalStrengthData.hpp>
+#include <command/OperatorNameData.hpp>
 
 namespace
 {
@@ -110,6 +113,7 @@ sys::ReturnCodes ServiceBluetooth::InitHandler()
     connectHandler<message::bluetooth::ResponseAuthenticatePin>();
     connectHandler<message::bluetooth::ResponseAuthenticatePasskey>();
     connectHandler<message::bluetooth::ResponseAuthenticatePairCancel>();
+    connectHandler<message::bluetooth::RequestCellularData>();
     connectHandler<CellularCallerIdMessage>();
     connectHandler<CellularCallActiveNotification>();
     connectHandler<CellularSignalStrengthUpdateNotification>();
@@ -498,8 +502,10 @@ auto ServiceBluetooth::handle(CellularCallActiveNotification *msg) -> std::share
 
 auto ServiceBluetooth::handle(CellularSignalStrengthUpdateNotification *msg) -> std::shared_ptr<sys::Message>
 {
-    auto bars = Store::GSM::get()->getSignalStrength().rssiBar;
-    LOG_INFO("Bluetooth: RSSI %d/5", static_cast<int>(bars));
+    auto signalStrength = Store::GSM::get()->getSignalStrength();
+    LOG_INFO("Bluetooth: RSSI %d/5", static_cast<int>(signalStrength.rssiBar));
+    auto commandData = std::make_shared<bluetooth::SignalStrengthData>(signalStrength);
+    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::SignalStrengthData, std::move(commandData)));
     return std::make_shared<sys::ResponseMessage>();
 }
 
@@ -507,6 +513,8 @@ auto ServiceBluetooth::handle(CellularCurrentOperatorNameNotification *msg) -> s
 {
     auto opName = msg->getCurrentOperatorName();
     LOG_INFO("Bluetooth: Operator name: %s", opName.c_str());
+    auto commandData = std::make_shared<bluetooth::OperatorNameData>(opName);
+    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::OperatorNameData, std::move(commandData)));
     return std::make_shared<sys::ResponseMessage>();
 }
 
@@ -538,4 +546,13 @@ void ServiceBluetooth::handleTurnOff()
     cpuSentinel->ReleaseMinimumFrequency();
     bus.sendMulticast(std::make_shared<sys::bluetooth::BluetoothModeChanged>(sys::bluetooth::BluetoothMode::Disabled),
                       sys::BusChannel::BluetoothModeChanges);
+}
+auto ServiceBluetooth::handle(message::bluetooth::RequestCellularData *msg) -> std::shared_ptr<sys::Message>
+{
+    bus.sendUnicast(std::make_shared<CellularRequestCurrentOperatorNameMessage>(), cellular::service::name);
+
+    // just to execute proper handle method and sending it back to worker
+    bus.sendUnicast(std::make_shared<CellularSignalStrengthUpdateNotification>(), service::name::bluetooth);
+
+    return sys::MessageNone{};
 }

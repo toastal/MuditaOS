@@ -55,6 +55,7 @@ namespace message::bluetooth
     class Ring;
     class StartAudioRouting;
     class GetBluetoothDevicesModel;
+    class RequestCellularData;
 } // namespace message::bluetooth
 
 class CellularCallerIdMessage;
@@ -119,6 +120,7 @@ class ServiceBluetooth : public sys::Service
     [[nodiscard]] auto handle(message::bluetooth::ResponseAuthenticatePin *msg) -> std::shared_ptr<sys::Message>;
     [[nodiscard]] auto handle(message::bluetooth::ResponseAuthenticatePasskey *msg) -> std::shared_ptr<sys::Message>;
     [[nodiscard]] auto handle(message::bluetooth::ResponseAuthenticatePairCancel *msg) -> std::shared_ptr<sys::Message>;
+    [[nodiscard]] auto handle(message::bluetooth::RequestCellularData *msg) -> std::shared_ptr<sys::Message>;
     [[nodiscard]] auto handle(CellularCallerIdMessage *msg) -> std::shared_ptr<sys::Message>;
     [[nodiscard]] auto handle(CellularCallActiveNotification *msg) -> std::shared_ptr<sys::Message>;
     [[nodiscard]] auto handle(CellularSignalStrengthUpdateNotification *msg) -> std::shared_ptr<sys::Message>;
