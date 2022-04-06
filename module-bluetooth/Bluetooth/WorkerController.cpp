@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include "WorkerController.hpp"
@@ -180,6 +180,6 @@ namespace bluetooth
     {
         LOG_INFO("Process command: %s", magic_enum::enum_name(command.getType()).data());
         pimpl->sm.process_event(ProcessCommand{command});
-        command.destroy();
+        LOG_DEBUG("Command processed");
     }
 } // namespace bluetooth

@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #pragma once
@@ -9,6 +9,8 @@
 
 #include <cstdint>
 #include <PhoneNumber.hpp>
+#include <command/Command.hpp>
+#include <utility>
 
 namespace sys
 {
@@ -19,75 +21,6 @@ namespace sys
 namespace bluetooth
 {
     class SettingsHolder;
-    class Command
-    {
-      public:
-        enum Type
-        {
-            StartScan,
-            StopScan,
-            getDevicesAvailable,
-            VisibilityOn,
-            VisibilityOff,
-            ConnectAudio,
-            DisconnectAudio,
-            PowerOn,
-            PowerOff,
-            Pair,
-            Unpair,
-            StartRinging,
-            StopRinging,
-            StartRouting,
-            StartStream,
-            StopStream,
-            SwitchProfile,
-            CallAnswered,
-            IncomingCallNumber,
-            None,
-        };
-        Command(Command::Type type, std::optional<Devicei> dev) : type(type)
-        {
-            if (dev.has_value()) {
-                device = dev.value();
-            }
-        }
-        Command(Command::Type type, std::optional<utils::PhoneNumber::View> num) : type(type)
-        {
-            if (num.has_value()) {
-                numberStringPtr  = new std::string();
-                *numberStringPtr = num->getEntered();
-            }
-        }
-        explicit Command(Command::Type type) : type(type)
-        {}
-        auto getType() const noexcept -> Command::Type
-        {
-            return type;
-        }
-
-        auto getDevice() const noexcept -> Devicei
-        {
-            return device;
-        }
-
-        auto getNumberString() noexcept -> std::string
-        {
-            if (numberStringPtr != nullptr) {
-                return *numberStringPtr;
-            }
-            return std::string();
-        }
-
-        void destroy()
-        {
-            delete numberStringPtr;
-        }
-
-      private:
-        Devicei device{};
-        std::string *numberStringPtr = nullptr;
-        Type type;
-    };
 
     class AbstractCommandHandler
     {

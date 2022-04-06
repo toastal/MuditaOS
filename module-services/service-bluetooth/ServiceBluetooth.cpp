@@ -40,6 +40,8 @@
 #include <service-bluetooth/messages/Authenticate.hpp>
 #include <GAP/GAP.hpp>
 #include <service-cellular/CellularMessage.hpp>
+#include <command/PhoneNumberData.hpp>
+#include <command/DeviceData.hpp>
 
 namespace
 {
@@ -220,7 +222,9 @@ auto ServiceBluetooth::handle(BluetoothPairMessage *msg) -> std::shared_ptr<sys:
 {
     auto device = msg->getDevice();
     bluetoothDevicesModel->removeDevice(device);
-    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::Pair, device));
+    auto commandData = std::make_shared<bluetooth::DeviceData>(device);
+
+    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::Pair, std::move(commandData)));
 
     device.deviceState = DeviceState::Pairing;
     bluetoothDevicesModel->insertDevice(device);
@@ -252,7 +256,8 @@ auto ServiceBluetooth::handle(BluetoothPairResultMessage *msg) -> std::shared_pt
 
 auto ServiceBluetooth::handle(message::bluetooth::Unpair *msg) -> std::shared_ptr<sys::Message>
 {
-    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::Unpair, msg->getDevice()));
+    auto commandData = std::make_shared<bluetooth::DeviceData>(msg->getDevice());
+    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::Unpair, std::move(commandData)));
     bluetoothDevicesModel->removeDevice(msg->getDevice());
 
     return sys::MessageNone{};
@@ -288,7 +293,8 @@ auto ServiceBluetooth::handle(message::bluetooth::SetDeviceName *msg) -> std::sh
 auto ServiceBluetooth::handle(message::bluetooth::Connect *msg) -> std::shared_ptr<sys::Message>
 {
     auto device = msg->getDevice();
-    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::ConnectAudio, device));
+    auto commandData = std::make_shared<bluetooth::DeviceData>(msg->getDevice());
+    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::ConnectAudio, std::move(commandData)));
 
     bluetoothDevicesModel->setInternalDeviceState(device, DeviceState::Connecting);
     bluetoothDevicesModel->syncDevicesWithApp();
@@ -421,7 +427,8 @@ auto ServiceBluetooth::handle(BluetoothMessage *msg) -> std::shared_ptr<sys::Mes
 
 auto ServiceBluetooth::handle(BluetoothAddrMessage *msg) -> std::shared_ptr<sys::Message>
 {
-    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::ConnectAudio, msg->device));
+    auto commandData = std::make_shared<bluetooth::DeviceData>(msg->device);
+    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::ConnectAudio, std::move(commandData)));
     return std::make_shared<sys::ResponseMessage>();
 }
 
@@ -476,7 +483,8 @@ auto ServiceBluetooth::handle(CellularCallerIdMessage *msg) -> std::shared_ptr<s
 
     if (btOn) {
         LOG_DEBUG("Sending to profile!");
-        sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::IncomingCallNumber, number));
+        auto commandData = std::make_shared<bluetooth::PhoneNumberData>(number);
+        sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::IncomingCallNumber, std::move(commandData)));
     }
 
     return sys::MessageNone{};

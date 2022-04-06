@@ -10,6 +10,7 @@
 #include "interface/profiles/HSP/HSP.hpp"
 #include "audio/BluetoothAudioDevice.hpp"
 #include "BtKeysStorage.hpp"
+#include "command/DeviceData.hpp"
 
 #if DEBUG_BLUETOOTH_HCI_COMS == 1
 #define logHciComs(...) LOG_DEBUG(__VA_ARGS__)
@@ -156,8 +157,8 @@ auto BluetoothWorker::handleCommand(QueueHandle_t queue) -> bool
         break;
     case bluetooth::Command::Unpair:
         controller->processCommand(command);
-        removeFromBoundDevices(command.getDevice().address);
-        handleUnpairDisconnect(command.getDevice());
+        removeFromBoundDevices(std::get<Devicei>(command.getData()).address);
+        handleUnpairDisconnect(std::get<Devicei>(command.getData()));
         break;
     case bluetooth::Command::None:
         break;
@@ -165,6 +166,7 @@ auto BluetoothWorker::handleCommand(QueueHandle_t queue) -> bool
         controller->processCommand(command);
         break;
     }
+    command.cleanup();
     return true;
 }
 
@@ -294,7 +296,8 @@ auto BluetoothWorker::isAddressConnected(const uint8_t *addr) -> bool
 void BluetoothWorker::handleUnpairDisconnect(const Devicei &device)
 {
     if (isAddressConnected(device.address)) {
-        auto disconnectCmd = bluetooth::Command(bluetooth::Command::DisconnectAudio, device);
+        auto commandData   = std::make_shared<bluetooth::DeviceData>(device);
+        auto disconnectCmd = bluetooth::Command(bluetooth::Command::DisconnectAudio, std::move(commandData));
         controller->processCommand(disconnectCmd);
     }
 }

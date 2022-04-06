@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include <service-bluetooth/ServiceBluetooth.hpp>
@@ -119,10 +119,10 @@ namespace bluetooth
     {
         return currentProfilePtr->callAnswered();
     }
-    auto ProfileManager::setIncomingCallNumber(const std::string &num) -> Error::Code
+    auto ProfileManager::setIncomingCallNumber(const utils::PhoneNumber::View &num) -> Error::Code
     {
         if (currentProfilePtr) {
-            return currentProfilePtr->setIncomingCallNumber(num);
+            return currentProfilePtr->setIncomingCallNumber(num.getE164());
         }
         LOG_ERROR("No profile, returning!");
         return Error::NotReady;

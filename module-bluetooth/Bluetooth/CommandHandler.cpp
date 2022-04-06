@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include "CommandHandler.hpp"
@@ -51,15 +51,15 @@ namespace bluetooth
         case bluetooth::Command::StopScan:
             return stopScan();
         case bluetooth::Command::Pair:
-            return pair(command.getDevice());
+            return pair(std::get<Devicei>(command.getData()));
         case bluetooth::Command::Unpair:
-            return unpair(command.getDevice());
+            return unpair(std::get<Devicei>(command.getData()));
         case bluetooth::Command::VisibilityOn:
             return setVisibility(true);
         case bluetooth::Command::VisibilityOff:
             return setVisibility(false);
         case bluetooth::Command::ConnectAudio:
-            return establishAudioConnection(command.getDevice());
+            return establishAudioConnection(std::get<Devicei>(command.getData()));
         case bluetooth::Command::DisconnectAudio:
             return disconnectAudioConnection();
         case bluetooth::Command::PowerOff:
@@ -77,7 +77,7 @@ namespace bluetooth
         case Command::CallAnswered:
             return profileManager->callAnswered();
         case Command::IncomingCallNumber:
-            return profileManager->setIncomingCallNumber(command.getNumberString());
+            return profileManager->setIncomingCallNumber(std::get<utils::PhoneNumber::View>(command.getData()));
         case Command::StartStream:
             profileManager->start();
             return Error::Success;
@@ -164,4 +164,5 @@ namespace bluetooth
 
         return Error::Success;
     }
+
 } // namespace bluetooth
