@@ -75,7 +75,8 @@ class ServiceBluetooth : public sys::Service
     sys::ReturnCodes DeinitHandler() override;
     void ProcessCloseReason(sys::CloseReason closeReason) override;
     virtual sys::ReturnCodes SwitchPowerModeHandler(const sys::ServicePowerMode mode) override;
-    void sendWorkerCommand(bluetooth::Command command);
+    void sendWorkerCommand(bluetooth::Command::Type commandType,
+                           std::unique_ptr<bluetooth::CommandData> data = nullptr);
     void handleTurnOff();
     QueueHandle_t workerQueue = nullptr;
     std::shared_ptr<bluetooth::SettingsHolder> settingsHolder;

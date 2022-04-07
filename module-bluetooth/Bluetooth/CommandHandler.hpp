@@ -27,7 +27,7 @@ namespace bluetooth
       public:
         virtual ~AbstractCommandHandler() noexcept = default;
 
-        virtual auto handle(Command command) -> Error::Code = 0;
+        virtual auto handle(Command &command) -> Error::Code = 0;
     };
 
     class CommandHandler : public AbstractCommandHandler
@@ -38,16 +38,16 @@ namespace bluetooth
                                 std::shared_ptr<bluetooth::ProfileManager> profileManager,
                                 std::shared_ptr<bluetooth::AbstractDriver> driver);
 
-        auto handle(Command command) -> Error::Code override;
+        auto handle(Command &command) -> Error::Code override;
 
       private:
         Error::Code scan();
         Error::Code stopScan();
         Error::Code setVisibility(bool visibility);
-        Error::Code establishAudioConnection(const Devicei &device);
+        Error::Code establishAudioConnection(const DataVariant &data);
         Error::Code disconnectAudioConnection();
-        Error::Code pair(const Devicei &device);
-        Error::Code unpair(const Devicei &device);
+        Error::Code pair(const DataVariant &data);
+        Error::Code unpair(const DataVariant &data);
         Error::Code availableDevices();
         Error::Code switchAudioProfile();
         sys::Service *service;

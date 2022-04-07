@@ -29,7 +29,7 @@ namespace bluetooth
             // audio & capa cell & HSP & HFP  & A2DP-> HFP
             // audio & capa cell & HSP  & A2DP-> HSP
             // audio & HSP & HFP & A2DP -> A2DP
-            currentProfilePtr = profilesList[AudioProfile::A2DP].get();
+            currentProfilePtr = profilesList[AudioProfile::HFP].get();
 
             if (auto serviceBt = dynamic_cast<ServiceBluetooth *>(ownerService); serviceBt != nullptr) {
                 serviceBt->profileManagerPtr = this;
@@ -119,26 +119,29 @@ namespace bluetooth
     {
         return currentProfilePtr->callAnswered();
     }
-    auto ProfileManager::setIncomingCallNumber(const utils::PhoneNumber::View &num) -> Error::Code
+    auto ProfileManager::setIncomingCallNumber(const DataVariant &data) -> Error::Code
     {
+        auto number = std::get<utils::PhoneNumber::View>(data);
         if (currentProfilePtr) {
-            return currentProfilePtr->setIncomingCallNumber(num.getE164());
+            return currentProfilePtr->setIncomingCallNumber(number.getE164());
         }
         LOG_ERROR("No profile, returning!");
         return Error::NotReady;
     }
-    auto ProfileManager::setSignalStrengthData(const Store::SignalStrength &num) -> Error::Code
+    auto ProfileManager::setSignalStrengthData(const DataVariant &data) -> Error::Code
     {
+        auto signalData = std::get<Store::SignalStrength>(data);
         if (currentProfilePtr) {
-            return currentProfilePtr->setSignalStrength(static_cast<int>(num.rssiBar));
+            return currentProfilePtr->setSignalStrength(static_cast<int>(signalData.rssiBar));
         }
         LOG_ERROR("No profile, returning!");
         return Error::NotReady;
     }
-    auto ProfileManager::setOperatorNameData(const std::string_view &name) -> Error::Code
+    auto ProfileManager::setOperatorNameData(const DataVariant &data) -> Error::Code
     {
+        auto operatorName = std::get<std::string>(data);
         if (currentProfilePtr) {
-            return currentProfilePtr->setOperatorName(name);
+            return currentProfilePtr->setOperatorName(operatorName);
         }
         LOG_ERROR("No profile, returning!");
         return Error::NotReady;

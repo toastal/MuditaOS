@@ -12,8 +12,6 @@ namespace bluetooth
     {
       public:
         explicit DeviceData(const Devicei &device);
-
-        auto clone() -> CommandData * override;
         auto getData() -> DataVariant override;
 
       private:

@@ -11,8 +11,6 @@ namespace bluetooth
     {
       public:
         explicit OperatorNameData(const std::string &operatorName);
-
-        auto clone() -> CommandData * override;
         auto getData() -> DataVariant override;
 
       private:

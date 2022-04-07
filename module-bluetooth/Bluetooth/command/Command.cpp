@@ -2,34 +2,25 @@
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include "Command.hpp"
+#include <log/log.hpp>
 
 namespace bluetooth
 {
 
-    Command::Command(Command::Type type, const std::shared_ptr<CommandData> &data) : type(type)
-    {
-        if (data != nullptr) {
-            commandData = data->clone();
-        }
-    }
-
-    void Command::cleanup()
-    {
-        LOG_DEBUG("Command cleanup");
-        delete commandData;
-    }
+    Command::Command(CommandPack &&pack) : data(std::move(pack))
+    {}
 
     auto Command::getType() const noexcept -> Command::Type
     {
-        return type;
+        return data.commandType;
     }
 
     auto Command::getData() -> DataVariant
     {
-        if (commandData == nullptr) {
+        if (data.data == nullptr) {
             LOG_ERROR("Terrible,terrible damage!");
             return DataVariant{};
         }
-        return commandData->getData();
+        return data.data->getData();
     }
 } // namespace bluetooth

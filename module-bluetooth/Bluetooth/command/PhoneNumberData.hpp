@@ -12,8 +12,6 @@ namespace bluetooth
       public:
         explicit PhoneNumberData(const utils::PhoneNumber::View &view);
         explicit PhoneNumberData(const utils::PhoneNumber &number);
-
-        auto clone() -> CommandData * override;
         auto getData() -> DataVariant override;
 
       private:

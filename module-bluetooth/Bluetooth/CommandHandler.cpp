@@ -39,7 +39,7 @@ namespace bluetooth
         this->driver->registerPowerOnCallback([profilePtr = this->profileManager]() { profilePtr->init(); });
     }
 
-    Error::Code CommandHandler::handle(Command command)
+    Error::Code CommandHandler::handle(Command &command)
     {
         switch (command.getType()) {
         case bluetooth::Command::PowerOn:
@@ -51,15 +51,15 @@ namespace bluetooth
         case bluetooth::Command::StopScan:
             return stopScan();
         case bluetooth::Command::Pair:
-            return pair(std::get<Devicei>(command.getData()));
+            return pair(command.getData());
         case bluetooth::Command::Unpair:
-            return unpair(std::get<Devicei>(command.getData()));
+            return unpair(command.getData());
         case bluetooth::Command::VisibilityOn:
             return setVisibility(true);
         case bluetooth::Command::VisibilityOff:
             return setVisibility(false);
         case bluetooth::Command::ConnectAudio:
-            return establishAudioConnection(std::get<Devicei>(command.getData()));
+            return establishAudioConnection(command.getData());
         case bluetooth::Command::DisconnectAudio:
             return disconnectAudioConnection();
         case bluetooth::Command::PowerOff:
@@ -77,11 +77,11 @@ namespace bluetooth
         case Command::CallAnswered:
             return profileManager->callAnswered();
         case Command::IncomingCallNumber:
-            return profileManager->setIncomingCallNumber(std::get<utils::PhoneNumber::View>(command.getData()));
+            return profileManager->setIncomingCallNumber(command.getData());
         case Command::SignalStrengthData:
-            return profileManager->setSignalStrengthData(std::get<Store::SignalStrength>(command.getData()));
+            return profileManager->setSignalStrengthData(command.getData());
         case Command::OperatorNameData:
-            return profileManager->setOperatorNameData(std::get<std::string>(command.getData()));
+            return profileManager->setOperatorNameData(command.getData());
         case Command::StartStream:
             profileManager->start();
             return Error::Success;
@@ -119,8 +119,9 @@ namespace bluetooth
         return Error::Success;
     }
 
-    Error::Code CommandHandler::establishAudioConnection(const Devicei &device)
+    Error::Code CommandHandler::establishAudioConnection(const DataVariant &data)
     {
+        auto device = std::get<Devicei>(data);
         LOG_INFO("Connecting audio");
         profileManager->connect(device);
         return Error::Success;
@@ -132,12 +133,13 @@ namespace bluetooth
         profileManager->disconnect();
         return Error::Success;
     }
-    Error::Code CommandHandler::pair(const Devicei &device)
+    Error::Code CommandHandler::pair(const DataVariant &data)
     {
+        auto device = std::get<Devicei>(data);
         LOG_INFO("Pairing...");
-        const auto error_code = driver->pair(device) ? Error::Success : Error::LibraryError;
-        LOG_INFO("Pairing result: %s", magic_enum::enum_name(error_code).data());
-        return error_code;
+        const auto errorCode = driver->pair(device) ? Error::Success : Error::LibraryError;
+        LOG_INFO("Pairing result: %s", magic_enum::enum_name(errorCode).data());
+        return errorCode;
     }
     Error::Code CommandHandler::switchAudioProfile()
     {
@@ -153,12 +155,13 @@ namespace bluetooth
         profileManager->switchProfile(profile);
         return Error::Success;
     }
-    Error::Code CommandHandler::unpair(const Devicei &device)
+    Error::Code CommandHandler::unpair(const DataVariant &data)
     {
+        auto device = std::get<Devicei>(data);
         LOG_INFO("Unpairing...");
-        const auto error_code = driver->unpair(device) ? Error::Success : Error::LibraryError;
-        LOG_INFO("Unpairing result: %s", magic_enum::enum_name(error_code).data());
-        return error_code;
+        const auto errorCode = driver->unpair(device) ? Error::Success : Error::LibraryError;
+        LOG_INFO("Unpairing result: %s", magic_enum::enum_name(errorCode).data());
+        return errorCode;
     }
 
     Error::Code CommandHandler::availableDevices()

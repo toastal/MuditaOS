@@ -7,11 +7,6 @@ namespace bluetooth
 {
     SignalStrengthData::SignalStrengthData(const Store::SignalStrength &signalStrength) : signalStrength(signalStrength)
     {}
-    auto SignalStrengthData::clone() -> CommandData *
-    {
-        CommandData *clone = new SignalStrengthData(*this);
-        return clone;
-    }
     auto SignalStrengthData::getData() -> DataVariant
     {
         return signalStrength;

@@ -11,8 +11,6 @@ namespace bluetooth
     {
       public:
         explicit SignalStrengthData(const Store::SignalStrength &signalStrength);
-
-        auto clone() -> CommandData * override;
         auto getData() -> DataVariant override;
 
       private:

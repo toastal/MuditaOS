@@ -48,7 +48,7 @@
 
 namespace
 {
-    constexpr auto BluetoothServiceStackDepth = 2560U;
+    constexpr auto BluetoothServiceStackDepth = 4098U;
     inline constexpr auto nameSettings        = "ApplicationSettings";
     inline constexpr auto connectionTimeout   = std::chrono::minutes{10};
     inline constexpr auto btRestartDelay      = std::chrono::milliseconds{500};
@@ -139,8 +139,8 @@ sys::ReturnCodes ServiceBluetooth::DeinitHandler()
 
 void ServiceBluetooth::ProcessCloseReason(sys::CloseReason closeReason)
 {
-    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::DisconnectAudio));
-    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::PowerOff));
+    sendWorkerCommand(bluetooth::Command::Type::DisconnectAudio);
+    sendWorkerCommand(bluetooth::Command::Type::PowerOff);
 }
 
 sys::MessagePointer ServiceBluetooth::DataReceivedHandler([[maybe_unused]] sys::DataMessage *msg,
@@ -154,11 +154,16 @@ sys::ReturnCodes ServiceBluetooth::SwitchPowerModeHandler(const sys::ServicePowe
     LOG_ERROR("TODO");
     return sys::ReturnCodes::Success;
 }
-void ServiceBluetooth::sendWorkerCommand(bluetooth::Command command)
-{
-    xQueueSend(workerQueue, &command, portMAX_DELAY);
-}
 
+void ServiceBluetooth::sendWorkerCommand(bluetooth::Command::Type commandType,
+                                         std::unique_ptr<bluetooth::CommandData> data)
+{
+    bluetooth::Command::CommandPack pack;
+    pack.data        = std::move(data);
+    pack.commandType = commandType;
+    xQueueSend(workerQueue, &pack, portMAX_DELAY);
+    pack.data.release();
+}
 auto ServiceBluetooth::handle(BluetoothAudioStartMessage *msg) -> std::shared_ptr<sys::Message>
 {
     worker->setAudioDevice(msg->getAudioDevice());
@@ -197,7 +202,7 @@ auto ServiceBluetooth::handle(message::bluetooth::SetStatus *msg) -> std::shared
     case BluetoothStatus::State::On:
 
         cpuSentinel->HoldMinimumFrequency(bsp::CpuFrequencyMHz::Level_3);
-        sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::PowerOn));
+        sendWorkerCommand(bluetooth::Command::Type::PowerOn);
         bus.sendMulticast(
             std::make_shared<sys::bluetooth::BluetoothModeChanged>(sys::bluetooth::BluetoothMode::Enabled),
             sys::BusChannel::BluetoothModeChanges);
@@ -216,9 +221,8 @@ auto ServiceBluetooth::handle(message::bluetooth::SetStatus *msg) -> std::shared
     default:
         break;
     }
-    bluetooth::Command command(newBtStatus.visibility ? bluetooth::Command::Type::VisibilityOn
-                                                      : bluetooth::Command::Type::VisibilityOff);
-    sendWorkerCommand(command);
+    sendWorkerCommand(newBtStatus.visibility ? bluetooth::Command::Type::VisibilityOn
+                                             : bluetooth::Command::Type::VisibilityOff);
     return sys::MessageNone{};
 }
 
@@ -226,9 +230,9 @@ auto ServiceBluetooth::handle(BluetoothPairMessage *msg) -> std::shared_ptr<sys:
 {
     auto device = msg->getDevice();
     bluetoothDevicesModel->removeDevice(device);
-    auto commandData = std::make_shared<bluetooth::DeviceData>(device);
+    auto commandData = std::make_unique<bluetooth::DeviceData>(device);
 
-    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::Pair, std::move(commandData)));
+    sendWorkerCommand(bluetooth::Command::Type::Pair, std::move(commandData));
 
     device.deviceState = DeviceState::Pairing;
     bluetoothDevicesModel->insertDevice(device);
@@ -260,8 +264,8 @@ auto ServiceBluetooth::handle(BluetoothPairResultMessage *msg) -> std::shared_pt
 
 auto ServiceBluetooth::handle(message::bluetooth::Unpair *msg) -> std::shared_ptr<sys::Message>
 {
-    auto commandData = std::make_shared<bluetooth::DeviceData>(msg->getDevice());
-    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::Unpair, std::move(commandData)));
+    auto commandData = std::make_unique<bluetooth::DeviceData>(msg->getDevice());
+    sendWorkerCommand(bluetooth::Command::Type::Unpair, std::move(commandData));
     bluetoothDevicesModel->removeDevice(msg->getDevice());
 
     return sys::MessageNone{};
@@ -283,11 +287,11 @@ auto ServiceBluetooth::handle(message::bluetooth::SetDeviceName *msg) -> std::sh
     auto newName = msg->getName();
     bluetooth::set_name(newName);
     settingsHolder->setValue(bluetooth::Settings::DeviceName, newName);
-    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::PowerOff));
+    sendWorkerCommand(bluetooth::Command::Type::PowerOff);
 
     btRestartTimer =
         sys::TimerFactory::createSingleShotTimer(this, "btRestartTimer", btRestartDelay, [this](sys::Timer &_) {
-            sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::PowerOn));
+            sendWorkerCommand(bluetooth::Command::Type::PowerOn);
         });
     btRestartTimer.start();
 
@@ -297,8 +301,8 @@ auto ServiceBluetooth::handle(message::bluetooth::SetDeviceName *msg) -> std::sh
 auto ServiceBluetooth::handle(message::bluetooth::Connect *msg) -> std::shared_ptr<sys::Message>
 {
     auto device = msg->getDevice();
-    auto commandData = std::make_shared<bluetooth::DeviceData>(msg->getDevice());
-    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::ConnectAudio, std::move(commandData)));
+    auto commandData = std::make_unique<bluetooth::DeviceData>(msg->getDevice());
+    sendWorkerCommand(bluetooth::Command::Type::ConnectAudio, std::move(commandData));
 
     bluetoothDevicesModel->setInternalDeviceState(device, DeviceState::Connecting);
     bluetoothDevicesModel->syncDevicesWithApp();
@@ -334,7 +338,7 @@ auto ServiceBluetooth::handle(message::bluetooth::ConnectResult *msg) -> std::sh
 
 auto ServiceBluetooth::handle([[maybe_unused]] message::bluetooth::Disconnect *msg) -> std::shared_ptr<sys::Message>
 {
-    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::DisconnectAudio));
+    sendWorkerCommand(bluetooth::Command::Type::DisconnectAudio);
     return sys::MessageNone{};
 }
 
@@ -395,32 +399,31 @@ auto ServiceBluetooth::handle(BluetoothMessage *msg) -> std::shared_ptr<sys::Mes
     case BluetoothMessage::Start:
         break;
     case BluetoothMessage::Scan:
-        sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::StartScan));
+        sendWorkerCommand(bluetooth::Command::Type::StartScan);
         break;
     case BluetoothMessage::StopScan:
-        sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::StopScan));
+        sendWorkerCommand(bluetooth::Command::Type::StopScan);
         break;
     case BluetoothMessage::getDevicesAvailable:
-        sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::getDevicesAvailable));
+        sendWorkerCommand(bluetooth::Command::Type::getDevicesAvailable);
         break;
     case BluetoothMessage::Visible: {
         auto visibility =
             not std::visit(bluetooth::BoolVisitor(), settingsHolder->getValue(bluetooth::Settings::Visibility));
-        bluetooth::Command command(visibility ? bluetooth::Command::Type::VisibilityOn
-                                              : bluetooth::Command::Type::VisibilityOff);
-        sendWorkerCommand(command);
+        sendWorkerCommand(visibility ? bluetooth::Command::Type::VisibilityOn
+                                     : bluetooth::Command::Type::VisibilityOff);
     } break;
     case BluetoothMessage::Play:
-        sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::StartStream));
+        sendWorkerCommand(bluetooth::Command::Type::StartStream);
         break;
     case BluetoothMessage::SwitchProfile:
-        sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::SwitchProfile));
+        sendWorkerCommand(bluetooth::Command::Type::SwitchProfile);
         break;
     case BluetoothMessage::Disconnect:
-        sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::DisconnectAudio));
+        sendWorkerCommand(bluetooth::Command::Type::DisconnectAudio);
         break;
     case BluetoothMessage::Stop:
-        sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::StopStream));
+        sendWorkerCommand(bluetooth::Command::Type::StopStream);
         break;
     default:
         break;
@@ -431,15 +434,15 @@ auto ServiceBluetooth::handle(BluetoothMessage *msg) -> std::shared_ptr<sys::Mes
 
 auto ServiceBluetooth::handle(BluetoothAddrMessage *msg) -> std::shared_ptr<sys::Message>
 {
-    auto commandData = std::make_shared<bluetooth::DeviceData>(msg->device);
-    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::ConnectAudio, std::move(commandData)));
+    auto commandData = std::make_unique<bluetooth::DeviceData>(msg->device);
+    sendWorkerCommand(bluetooth::Command::Type::ConnectAudio, std::move(commandData));
     return std::make_shared<sys::ResponseMessage>();
 }
 
 auto ServiceBluetooth::handle(sdesktop::developerMode::DeveloperModeRequest *msg) -> std::shared_ptr<sys::Message>
 {
     if (typeid(*msg->event) == typeid(sdesktop::bluetooth::GetAvailableDevicesEvent)) {
-        sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::getDevicesAvailable));
+        sendWorkerCommand(bluetooth::Command::Type::getDevicesAvailable);
     }
     return sys::MessageNone{};
 }
@@ -467,15 +470,14 @@ auto ServiceBluetooth::handle(message::bluetooth::HFPVolume *msg) -> std::shared
 auto ServiceBluetooth::handle(message::bluetooth::Ring *msg) -> std::shared_ptr<sys::Message>
 {
     const auto enableRing = msg->enabled();
-    sendWorkerCommand(bluetooth::Command(enableRing ? bluetooth::Command::Type::StartRinging
-                                                    : bluetooth::Command::Type::StopRinging));
+    sendWorkerCommand(enableRing ? bluetooth::Command::Type::StartRinging : bluetooth::Command::Type::StopRinging);
 
     return std::make_shared<sys::ResponseMessage>();
 }
 
 auto ServiceBluetooth::handle(message::bluetooth::StartAudioRouting *msg) -> std::shared_ptr<sys::Message>
 {
-    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::StartRouting));
+    sendWorkerCommand(bluetooth::Command::Type::StartRouting);
     return std::make_shared<sys::ResponseMessage>();
 }
 
@@ -487,8 +489,8 @@ auto ServiceBluetooth::handle(CellularCallerIdMessage *msg) -> std::shared_ptr<s
 
     if (btOn) {
         LOG_DEBUG("Sending to profile!");
-        auto commandData = std::make_shared<bluetooth::PhoneNumberData>(number);
-        sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::IncomingCallNumber, std::move(commandData)));
+        auto commandData = std::make_unique<bluetooth::PhoneNumberData>(number);
+        sendWorkerCommand(bluetooth::Command::Type::IncomingCallNumber, std::move(commandData));
     }
 
     return sys::MessageNone{};
@@ -496,7 +498,7 @@ auto ServiceBluetooth::handle(CellularCallerIdMessage *msg) -> std::shared_ptr<s
 
 auto ServiceBluetooth::handle(CellularCallActiveNotification *msg) -> std::shared_ptr<sys::Message>
 {
-    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::CallAnswered));
+    sendWorkerCommand(bluetooth::Command::Type::CallAnswered);
     return std::make_shared<sys::ResponseMessage>();
 }
 
@@ -504,8 +506,8 @@ auto ServiceBluetooth::handle(CellularSignalStrengthUpdateNotification *msg) -> 
 {
     auto signalStrength = Store::GSM::get()->getSignalStrength();
     LOG_INFO("Bluetooth: RSSI %d/5", static_cast<int>(signalStrength.rssiBar));
-    auto commandData = std::make_shared<bluetooth::SignalStrengthData>(signalStrength);
-    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::SignalStrengthData, std::move(commandData)));
+    auto commandData = std::make_unique<bluetooth::SignalStrengthData>(signalStrength);
+    sendWorkerCommand(bluetooth::Command::Type::SignalStrengthData, std::move(commandData));
     return std::make_shared<sys::ResponseMessage>();
 }
 
@@ -513,8 +515,8 @@ auto ServiceBluetooth::handle(CellularCurrentOperatorNameNotification *msg) -> s
 {
     auto opName = msg->getCurrentOperatorName();
     LOG_INFO("Bluetooth: Operator name: %s", opName.c_str());
-    auto commandData = std::make_shared<bluetooth::OperatorNameData>(opName);
-    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::OperatorNameData, std::move(commandData)));
+    auto commandData = std::make_unique<bluetooth::OperatorNameData>(opName);
+    sendWorkerCommand(bluetooth::Command::Type::OperatorNameData, std::move(commandData));
     return std::make_shared<sys::ResponseMessage>();
 }
 
@@ -542,7 +544,7 @@ void ServiceBluetooth::resetTimeoutTimer()
 
 void ServiceBluetooth::handleTurnOff()
 {
-    sendWorkerCommand(bluetooth::Command(bluetooth::Command::Type::PowerOff));
+    sendWorkerCommand(bluetooth::Command::Type::PowerOff);
     cpuSentinel->ReleaseMinimumFrequency();
     bus.sendMulticast(std::make_shared<sys::bluetooth::BluetoothModeChanged>(sys::bluetooth::BluetoothMode::Disabled),
                       sys::BusChannel::BluetoothModeChanges);

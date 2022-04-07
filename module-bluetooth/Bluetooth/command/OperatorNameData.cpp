@@ -7,11 +7,6 @@ namespace bluetooth
 {
     OperatorNameData::OperatorNameData(const std::string &operatorName) : operatorName(operatorName)
     {}
-    auto OperatorNameData::clone() -> CommandData *
-    {
-        CommandData *clone = new OperatorNameData(*this);
-        return clone;
-    }
     auto OperatorNameData::getData() -> DataVariant
     {
         return operatorName;

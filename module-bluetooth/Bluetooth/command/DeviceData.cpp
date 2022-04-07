@@ -8,11 +8,6 @@ namespace bluetooth
     DeviceData::DeviceData(const Devicei &device) : device(device)
     {}
 
-    auto DeviceData::clone() -> CommandData *
-    {
-        CommandData *clone = new DeviceData(*this);
-        return clone;
-    }
     auto DeviceData::getData() -> DataVariant
     {
         return device;

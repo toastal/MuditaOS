@@ -16,13 +16,7 @@ namespace bluetooth
     {
       public:
         virtual auto getData() -> DataVariant = 0;
-        virtual auto clone() -> CommandData * = 0;
         virtual ~CommandData()                = default;
 
-      protected:
-        CommandData()                    = default;
-        CommandData(const CommandData &) = default;
-        CommandData(CommandData &&)      = default;
     };
-
 } // namespace bluetooth

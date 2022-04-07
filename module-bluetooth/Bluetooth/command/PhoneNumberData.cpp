@@ -9,11 +9,6 @@ namespace bluetooth
     {}
     PhoneNumberData::PhoneNumberData(const utils::PhoneNumber &number) : view(number.getView())
     {}
-    auto PhoneNumberData::clone() -> CommandData *
-    {
-        CommandData *clone = new PhoneNumberData(*this);
-        return clone;
-    }
     auto PhoneNumberData::getData() -> DataVariant
     {
         return view;
