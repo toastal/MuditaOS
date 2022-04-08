@@ -41,6 +41,7 @@
 #include <common/popups/BellTurnOffOptionWindow.hpp>
 #include <common/models/AudioModel.hpp>
 #include <common/models/TimeModel.hpp>
+#include <common/models/AlarmModel.hpp>
 #include <common/models/AlarmSettingsModel.hpp>
 #include <service-evtmgr/EventManagerServiceAPI.hpp>
 #include <service-appmgr/messages/GetCurrentDisplayLanguageResponse.hpp>
@@ -97,8 +98,9 @@ namespace app
             gui::window::name::bellSettingsLayout, [this](ApplicationCommon *app, const std::string &name) {
                 auto layoutModel = std::make_unique<bell_settings::LayoutModel>(this);
                 auto timeModel   = std::make_unique<app::TimeModel>();
+                auto alarmModel  = std::make_unique<app::AlarmModel>(app);
                 auto presenter   = std::make_unique<bell_settings::LayoutWindowPresenter>(
-                    this, std::move(layoutModel), std::move(timeModel));
+                    this, std::move(layoutModel), std::move(timeModel), std::move(alarmModel));
                 return std::make_unique<gui::BellSettingsLayoutWindow>(app, std::move(presenter), name);
             });
 

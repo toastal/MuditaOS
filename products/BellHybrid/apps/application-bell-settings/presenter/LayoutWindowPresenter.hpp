@@ -7,6 +7,7 @@
 #include <apps-common/ApplicationCommon.hpp>
 #include <common/models/LayoutModel.hpp>
 #include <common/models/TimeModel.hpp>
+#include <common/models/AlarmModel.hpp>
 #include <common/layouts/HomeScreenLayouts.hpp>
 
 #include <vector>
@@ -39,13 +40,15 @@ namespace app::bell_settings
         app::ApplicationCommon *app{};
         std::unique_ptr<AbstractLayoutModel> layoutModel;
         std::unique_ptr<AbstractTimeModel> timeModel;
+        std::unique_ptr<AbstractAlarmModel> alarmModel;
         std::vector<std::pair<gui::Item *, const std::string>> layoutOptions;
         void initLayoutOptions();
 
       public:
         explicit LayoutWindowPresenter(app::ApplicationCommon *app,
                                        std::unique_ptr<AbstractLayoutModel> &&layoutModel,
-                                       std::unique_ptr<AbstractTimeModel> &&timeModel);
+                                       std::unique_ptr<AbstractTimeModel> &&timeModel,
+                                       std::unique_ptr<AbstractAlarmModel> &&alarmModel);
 
         std::vector<gui::Item *> getLayouts() const override;
         gui::Item *getSelectedLayout() const override;

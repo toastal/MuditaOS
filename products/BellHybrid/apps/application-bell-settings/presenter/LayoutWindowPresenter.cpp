@@ -27,8 +27,9 @@ namespace app::bell_settings
 {
     LayoutWindowPresenter::LayoutWindowPresenter(app::ApplicationCommon *app,
                                                  std::unique_ptr<AbstractLayoutModel> &&layoutModel,
-                                                 std::unique_ptr<AbstractTimeModel> &&timeModel)
-        : app(app), layoutModel{std::move(layoutModel)}, timeModel{std::move(timeModel)}
+                                                 std::unique_ptr<AbstractTimeModel> &&timeModel,
+                                                 std::unique_ptr<AbstractAlarmModel> &&alarmModel)
+        : app(app), layoutModel{std::move(layoutModel)}, timeModel{std::move(timeModel)}, alarmModel{std::move(alarmModel)}
     {
         initLayoutOptions();
     }
@@ -78,7 +79,12 @@ namespace app::bell_settings
 
         for (auto &layoutEntry : layoutsList) {
             auto layout = layoutEntry.second();
-            layout->setViewState(app::home_screen::ViewState::Activated);
+            if(alarmModel->isActive()) {
+                layout->setViewState(app::home_screen::ViewState::Activated);
+            } 
+            else {
+                layout->setViewState(app::home_screen::ViewState::Deactivated);
+            }
             layout->setTimeFormat(timeModel->getTimeFormat());
             layout->setTime(clockTime);
             layout->setAlarmTime(alarmTime);
