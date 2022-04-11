@@ -60,8 +60,8 @@ namespace bluetooth
         [[maybe_unused]] static hfp_generic_status_indicator_t hf_indicators[2];
         static std::shared_ptr<CVSDAudioDevice> audioDevice;
         static Devicei device;
-        static bool isAudioRouted;
         static bool isConnected;
-        static bool isAudioConnectionEstablished;
+        static bool isIncomingCall;
+        static bool isCallInitialized;
     };
 } // namespace bluetooth

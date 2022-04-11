@@ -148,9 +148,9 @@ namespace bluetooth
         {2, 1},
     };
     Devicei HFP::HFPImpl::device;
-    bool HFP::HFPImpl::isAudioRouted                = false;
     bool HFP::HFPImpl::isConnected                  = false;
-    bool HFP::HFPImpl::isAudioConnectionEstablished = false;
+    bool HFP::HFPImpl::isIncomingCall               = false;
+    bool HFP::HFPImpl::isCallInitialized            = false;
 
     void HFP::HFPImpl::dump_supported_codecs(void)
     {
@@ -272,25 +272,21 @@ namespace bluetooth
             break;
         case HFP_SUBEVENT_AUDIO_CONNECTION_ESTABLISHED:
             if (hfp_subevent_audio_connection_established_get_status(event)) {
-                LOG_DEBUG("Audio connection establishment failed with status %u\n",
+                LOG_ERROR("Audio connection establishment failed with status %u\n",
                           hfp_subevent_audio_connection_established_get_status(event));
-                isAudioConnectionEstablished = false;
             }
             else {
                 scoHandle = hfp_subevent_audio_connection_established_get_sco_handle(event);
-                LOG_DEBUG("Audio connection established with SCO handle 0x%04x.\n", scoHandle);
+                LOG_ERROR("Audio connection established with SCO handle 0x%04x.\n", scoHandle);
                 codec = static_cast<SCOCodec>(hfp_subevent_audio_connection_established_get_negotiated_codec(event));
-                isAudioConnectionEstablished = true;
                 dump_supported_codecs();
                 hci_request_sco_can_send_now_event();
                 RunLoop::trigger();
             }
             break;
         case HFP_SUBEVENT_AUDIO_CONNECTION_RELEASED:
-            LOG_DEBUG("Audio connection released\n");
+            LOG_ERROR("Audio connection released");
             scoHandle = HCI_CON_HANDLE_INVALID;
-            isAudioRouted                = false;
-            isAudioConnectionEstablished = false;
             audioDevice.reset();
             break;
         case HFP_SUBEVENT_START_RINGING:
@@ -302,7 +298,7 @@ namespace bluetooth
             // todo stop ringtone stream here
             break;
         case HFP_SUBEVENT_PLACE_CALL_WITH_NUMBER:
-            hfp_ag_outgoing_call_accepted();
+
             break;
 
         case HFP_SUBEVENT_ATTACH_NUMBER_TO_VOICE_TAG:
@@ -315,12 +311,8 @@ namespace bluetooth
             hfp_ag_send_dtmf_code_done(aclHandle);
             break;
         case HFP_SUBEVENT_CALL_ANSWERED:
-            LOG_DEBUG("Call answered by HF\n");
+            LOG_ERROR("Call answered");
             cellularInterface->answerIncomingCall(const_cast<sys::Service *>(ownerService));
-            if (!isAudioRouted) {
-                audioInterface->startAudioRouting(const_cast<sys::Service *>(ownerService));
-                isAudioRouted = true;
-            }
             break;
 
         case HFP_SUBEVENT_SPEAKER_VOLUME: {
@@ -331,7 +323,7 @@ namespace bluetooth
         } break;
 
         case HFP_SUBEVENT_CALL_TERMINATED:
-            LOG_DEBUG("Call terminated by HF\n");
+            LOG_ERROR("Call terminated");
             cellularInterface->hangupCall(const_cast<sys::Service *>(ownerService));
             break;
         default:
@@ -340,13 +332,6 @@ namespace bluetooth
         }
     }
 
-    void HFP::HFPImpl::establishAudioConnection()
-    {
-        if (!isAudioConnectionEstablished) {
-            LOG_DEBUG("Establish Audio connection to %s...\n", bd_addr_to_str(device.address));
-            hfp_ag_establish_audio_connection(aclHandle);
-        }
-    }
     static hfp_phone_number_t subscriber_number = {129, "225577"};
     auto HFP::HFPImpl::init() -> Error::Code
     {
@@ -432,6 +417,7 @@ namespace bluetooth
     {
         return sco->getStreamData();
     }
+
     void HFP::HFPImpl::start()
     {
         if (!isConnected) {
@@ -440,9 +426,12 @@ namespace bluetooth
         hfp_ag_set_speaker_gain(aclHandle, 8);
         hfp_ag_set_microphone_gain(aclHandle, 10);
     }
+
     void HFP::HFPImpl::stop()
     {
-        hfp_ag_call_dropped();
+        hfp_ag_terminate_call();
+        isCallInitialized = false;
+        isIncomingCall    = false;
     }
 
     void HFP::HFPImpl::initCodecs()
@@ -466,9 +455,10 @@ namespace bluetooth
     }
     void HFP::HFPImpl::initializeCall() const noexcept
     {
-        if (!isAudioRouted) {
-            LOG_DEBUG("Phone number is unused in BT stack - mocking");
+        if (!isCallInitialized && !isIncomingCall) {
+            LOG_DEBUG("Initializing outgoing call");
             hfp_ag_outgoing_call_initiated("1234567");
+            isCallInitialized = true;
         }
     }
     void HFP::HFPImpl::setAudioDevice(std::shared_ptr<bluetooth::BluetoothAudioDevice> audioDevice)
@@ -478,20 +468,28 @@ namespace bluetooth
     }
     void HFP::HFPImpl::startRinging() const noexcept
     {
+        LOG_DEBUG("Starting incoming call");
+        isIncomingCall = true;
         hfp_ag_incoming_call();
     }
     void HFP::HFPImpl::stopRinging() const noexcept
-    {}
+    {
+        LOG_DEBUG("Stop ringing called!");
+    }
     auto HFP::HFPImpl::callAnswered() const noexcept -> Error::Code
     {
-        LOG_DEBUG("Call answered!");
-        hfp_ag_answer_incoming_call();
-        establishAudioConnection();
-        if (!isAudioRouted) {
-            LOG_DEBUG("Routing unrouted audio after answering call");
-            audioInterface->startAudioRouting(const_cast<sys::Service *>(ownerService));
-            isAudioRouted = true;
+        if (isIncomingCall) {
+            LOG_DEBUG("Answering incoming call");
+            hfp_ag_answer_incoming_call();
         }
+        else {
+            LOG_DEBUG("Establishing outgoing call");
+            audioInterface->startAudioRouting(const_cast<sys::Service *>(ownerService));
+            hfp_ag_outgoing_call_established();
+        }
+        LOG_DEBUG("Establishing HFP audio connection");
+        hfp_ag_establish_audio_connection(aclHandle);
+
         return Error::Success;
     }
     auto HFP::HFPImpl::setIncomingCallNumber(const std::string &num) const noexcept -> Error::Code
