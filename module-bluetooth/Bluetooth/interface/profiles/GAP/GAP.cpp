@@ -225,6 +225,7 @@ namespace bluetooth
      */
     void GAP::activeStateHandler(std::uint8_t eventType, std::uint8_t *packet, std::uint16_t size)
     {
+        uint8_t receivedIoCapability = IO_CAPABILITY_NO_INPUT_NO_OUTPUT;
         if (not(eventType == HCI_EVENT_TRANSPORT_PACKET_SENT || eventType == HCI_EVENT_COMMAND_STATUS ||
                 eventType == HCI_EVENT_INQUIRY_COMPLETE || eventType == HCI_EVENT_COMMAND_COMPLETE)) {
             LOG_DEBUG("event: 0x%02X - %s - size: %" PRIu16, eventType, evt_cstr(eventType), size);
@@ -236,6 +237,10 @@ namespace bluetooth
             break;
         case GAP_EVENT_PAIRING_STARTED:
             break;
+        case HCI_EVENT_IO_CAPABILITY_RESPONSE: {
+            receivedIoCapability = hci_event_io_capability_response_get_io_capability(packet);
+            LOG_DEBUG("Received IO capability: %d", receivedIoCapability);
+        } break;
 
         case HCI_EVENT_READ_REMOTE_SUPPORTED_FEATURES_COMPLETE:
             break;
@@ -252,11 +257,19 @@ namespace bluetooth
             }
             it->isPairingSSP = true;
 
-            auto msg = std::make_shared<::message::bluetooth::RequestAuthenticate>(
-                *it,
-                bluetooth::AuthenticateType::PairCancel,
-                (code != 0) ? static_cast<std::optional<unsigned long>>(code) : std::nullopt);
-            ownerService->bus.sendMulticast(std::move(msg), sys::BusChannel::BluetoothNotifications);
+            if ((receivedIoCapability == IO_CAPABILITY_KEYBOARD_ONLY) ||
+                (receivedIoCapability == IO_CAPABILITY_NO_INPUT_NO_OUTPUT)) {
+                LOG_INFO("Device has no display, confirming automatically");
+                gap_ssp_confirmation_response(addr);
+            }
+            else {
+                auto msg = std::make_shared<::message::bluetooth::RequestAuthenticate>(
+                    *it,
+                    bluetooth::AuthenticateType::PairCancel,
+                    (code != 0) ? static_cast<std::optional<unsigned long>>(code) : std::nullopt);
+                ownerService->bus.sendMulticast(std::move(msg), sys::BusChannel::BluetoothNotifications);
+            }
+
         } break;
 
         case HCI_EVENT_PIN_CODE_REQUEST: {
