@@ -156,6 +156,7 @@ namespace bluetooth
     bool HFP::HFPImpl::isConnected                  = false;
     bool HFP::HFPImpl::isIncomingCall               = false;
     bool HFP::HFPImpl::isCallInitialized            = false;
+    bool HFP::HFPImpl::isCallSetUp                  = false;
 
     void HFP::HFPImpl::dump_supported_codecs(void)
     {
@@ -433,9 +434,15 @@ namespace bluetooth
 
     void HFP::HFPImpl::stop()
     {
-        hfp_ag_terminate_call();
+        if (isCallSetUp) {
+            hfp_ag_terminate_call();
+        }
+        else {
+            hfp_ag_call_dropped();
+        }
         isCallInitialized = false;
         isIncomingCall    = false;
+        isCallSetUp       = false;
     }
 
     void HFP::HFPImpl::initCodecs()
@@ -468,8 +475,11 @@ namespace bluetooth
     }
     void HFP::HFPImpl::setAudioDevice(std::shared_ptr<bluetooth::BluetoothAudioDevice> audioDevice)
     {
+        LOG_DEBUG("Setting audio device");
         HFP::HFPImpl::audioDevice = std::static_pointer_cast<CVSDAudioDevice>(audioDevice);
         HFP::HFPImpl::audioDevice->setAclHandle(aclHandle);
+        LOG_DEBUG("Establishing HFP audio connection");
+        hfp_ag_establish_audio_connection(aclHandle);
     }
     void HFP::HFPImpl::startRinging() const noexcept
     {
@@ -489,11 +499,9 @@ namespace bluetooth
         }
         else {
             LOG_DEBUG("Establishing outgoing call");
-            audioInterface->startAudioRouting(const_cast<sys::Service *>(ownerService));
             hfp_ag_outgoing_call_established();
         }
-        LOG_DEBUG("Establishing HFP audio connection");
-        hfp_ag_establish_audio_connection(aclHandle);
+        isCallSetUp = true;
 
         return Error::Success;
     }

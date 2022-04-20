@@ -63,5 +63,6 @@ namespace bluetooth
         static bool isConnected;
         static bool isIncomingCall;
         static bool isCallInitialized;
+        static bool isCallSetUp;
     };
 } // namespace bluetooth
