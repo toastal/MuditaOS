@@ -1,3 +1,11 @@
-source .gdb_macros
+# .gdbinit-1051 file adapted for CLion, because it performs `gdb target` and `gdb load` on it own.
+# https://stackoverflow.com/questions/39810593/gdb-monitor-commands-in-clion
+# random FreeRTOS stuff triggers this
+handle SIGUSR1 noprint nostop
+# setting breakpoints triggers this signal
+# handle SIGTRAP print nostop
 
-handle SIGUSR1 nostop noprint
+define hookpost-load
+monitor memU32 0x401BC000 = 128;
+eval "monitor exec SetRTTAddr %p", &_SEGGER_RTT
+end

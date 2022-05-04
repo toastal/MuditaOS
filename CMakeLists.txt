@@ -53,13 +53,13 @@ endif ()
 
 # setting build flags
 if (${PROJECT_TARGET} STREQUAL "TARGET_Linux")
-    set(CMAKE_C_FLAGS_DEBUG "-ggdb3 -DDEBUG")
+    set(CMAKE_C_FLAGS_DEBUG "-gdwarf-3 -DDEBUG")
     set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
-    set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -ggdb3 -DNDEBUG")
+    set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g3 -DNDEBUG")
 
-    set(CMAKE_CXX_FLAGS_DEBUG "-ggdb3 -DDEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG "-gdwarf-3 -DDEBUG")
     set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -ggdb3 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g3 -DNDEBUG")
 else()
     set(CMAKE_C_FLAGS_DEBUG "-ggdb3 -DDEBUG")
     set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
@@ -70,6 +70,12 @@ else()
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -ggdb3 -DNDEBUG")
 
 endif()
+
+find_program(CCACHE "ccache")
+if(CCACHE)
+    set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE})
+    set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE})
+endif(CCACHE)
 
 set(TOOLCHAIN_PATH "" CACHE STRING "Path to toolchain directory")
 

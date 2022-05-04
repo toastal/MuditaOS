@@ -6,7 +6,7 @@
 #include <fcntl.h>
 #include <fstream>
 #include <string>
-#include <sys/inotify.h>
+//TODO:MACIUS:#include <sys/inotify.h>
 #include <array>
 #include <limits.h>
 
@@ -53,6 +53,8 @@ namespace bsp
         usbCDCReceive(ptr);
     }
 
+    //TODO:MACIUS:
+#if 0
     void checkUsbStatus()
     {
         char eventsBuff[((sizeof(inotify_event) + NAME_MAX + 1))];
@@ -69,6 +71,7 @@ namespace bsp
             }
         }
     }
+#endif
 
     int usbCDCReceive(void *)
     {
@@ -77,7 +80,7 @@ namespace bsp
 
         while (1) {
 
-            checkUsbStatus();
+            //TODO:MACIUS:checkUsbStatus();
 
             if (uxQueueSpacesAvailable(USBReceiveQueue) != 0) {
                 memset(inputData, 0, SERIAL_BUFFER_LEN);
@@ -179,8 +182,8 @@ namespace bsp
             return -1;
         }
 
-        fdNofity = inotify_init1(O_NONBLOCK);
-        inotify_add_watch(fdNofity, pts_name, IN_OPEN | IN_CLOSE_WRITE);
+        //TODO:MACIUS:fdNofity = inotify_init1(O_NONBLOCK);
+        //TODO:MACIUS:inotify_add_watch(fdNofity, pts_name, IN_OPEN | IN_CLOSE_WRITE);
 
         writePtsToFile(pts_name);
         LOG_INFO("bsp::usbInit linux ptsname: %s", pts_name);

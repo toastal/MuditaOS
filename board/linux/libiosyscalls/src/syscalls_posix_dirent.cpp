@@ -3,6 +3,7 @@
 
 #include "iosyscalls-internal.hpp"
 
+#include <limits.h>
 #include <dirent.h>
 #include <errno.h>
 #include <cstring>

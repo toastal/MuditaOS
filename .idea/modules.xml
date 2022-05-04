@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/PureOS.iml" filepath="$PROJECT_DIR$/.idea/PureOS.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/PureOS2.iml" filepath="$PROJECT_DIR$/.idea/PureOS2.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/PurePhone.iml" filepath="$PROJECT_DIR$/.idea/PurePhone.iml" />
     </modules>
   </component>

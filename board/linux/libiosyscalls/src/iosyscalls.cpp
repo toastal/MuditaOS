@@ -31,7 +31,7 @@ namespace
 
     constexpr const char *IMAGE_PATHS[]{"/sys", "/mfgconf", "sys", "assets", "country-codes.db", "Luts.bin", nullptr};
 
-    pthread_mutex_t g_lock = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+    pthread_mutex_t g_lock = PTHREAD_RECURSIVE_MUTEX_INITIALIZER;
     phmap::flat_hash_set<vfsn::linux::internal::FILEX *> g_fdlist;
     phmap::flat_hash_set<DIR *> g_dirlist;
     std::string imageFileName;

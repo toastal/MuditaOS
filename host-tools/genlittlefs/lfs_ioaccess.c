@@ -11,7 +11,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include <linux/fs.h>
 #include <sys/ioctl.h>
 
 struct lfs_ioaccess_context

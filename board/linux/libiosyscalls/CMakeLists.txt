@@ -12,7 +12,7 @@ set(INCLUDES
     "${CMAKE_SOURCE_DIR}/module-vfs/include/internal"
 )
 
-add_library(${PROJECT_NAME} SHARED)
+add_library(${PROJECT_NAME} SHARED )
 
 target_sources(
         ${PROJECT_NAME}
@@ -21,11 +21,12 @@ target_sources(
         src/interface.cpp
         src/iosyscalls-internal.hpp
         src/iosyscalls.cpp
-        src/syscalls_posix_dirent.cpp
+#[[        src/syscalls_posix_dirent.cpp
         src/syscalls_posix.cpp
         src/syscalls_real.hpp
         src/syscalls_scan_family.cpp
-        src/syscalls_stdio.cpp
+        src/syscalls_stdio.cpp]]
+        src/mac/syscalls_mac.cpp
 
     PUBLIC
         include/debug.hpp
@@ -46,10 +47,11 @@ if("-fsanitize=address" IN_LIST target_options )
     set_property(TARGET ${PROJECT_NAME} PROPERTY LINK_OPTIONS ${target_options} )
 endif()
 
-target_link_options(${PROJECT_NAME} PRIVATE
-		"-Wl,--version-script"
-		"-Wl,${CMAKE_CURRENT_SOURCE_DIR}/version.txt"
-)
+#TODO:MACIUS
+#target_link_options(${PROJECT_NAME} PRIVATE
+#		"-Wl,--version-script"
+#		"-Wl,${CMAKE_CURRENT_SOURCE_DIR}/version.txt"
+#)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDES} )
 

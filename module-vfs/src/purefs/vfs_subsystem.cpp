@@ -127,7 +127,7 @@ namespace purefs::subsystem
         auto err                                 = disk_mgr->register_device(bdev, default_blkdev_name);
         if (err) {
             LOG_FATAL("Unable to register block device with error %i", err);
-            return {};
+            //return {};
         }
         const std::shared_ptr<blkdev::disk> nvrom_bdev = deviceFactory->makeDefaultNvmDevice();
         if (nvrom_bdev) {

@@ -265,7 +265,7 @@ namespace utils::time
         seconds   = (this->duration % secondsInHour) % secondsInMinute;
 
         if (verboseConversion) {
-            LOG_DEBUG("duration %" PRIu64 " - %lu hours %lu minutes %lu seconds", duration, hours, minutes, seconds);
+            LOG_DEBUG("duration %" PRIi64 " - %lu hours %lu minutes %lu seconds", (std::int64_t)duration, hours, minutes, seconds);
         }
     }
 

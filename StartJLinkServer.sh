@@ -40,7 +40,7 @@ while [[ $# -gt 0 ]]; do
     esac;
     shift
 done
-CMD="JLinkGDBServerCLExe -if SWD -device MCIMXRT1051                     \
+CMD="JLinkGDBServerCL -if SWD -device MCIMXRT1051                     \
     -jlinkscriptfile $jlinkScriptFileName -strict -ir    \
     -rtos GDBServer/RTOSPlugin_FreeRTOS                                  \
     ${OPTS[@]}"

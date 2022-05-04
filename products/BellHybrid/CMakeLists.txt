@@ -31,10 +31,11 @@ target_include_directories(BellHybrid
         ${CMAKE_BINARY_DIR}
 )
 
+#TODO:MACIUS -> check how to generate map
 set_target_properties(BellHybrid
     PROPERTIES
         SUFFIX ".elf"
-        LINK_FLAGS "-Xlinker -Map=${CMAKE_BINARY_DIR}/BellHybrid.map "
+        #LINK_FLAGS "-Xlinker -map -Xlinker ${CMAKE_BINARY_DIR}/BellHybrid.map "
     )
 
 target_link_libraries(BellHybrid

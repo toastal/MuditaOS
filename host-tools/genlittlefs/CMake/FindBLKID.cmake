@@ -15,7 +15,8 @@ FIND_PATH (BLKID_INCLUDE_DIR blkid.h
         /usr/local/include
         /usr/include
         /usr/include/blkid
-)
+        /opt/homebrew/Cellar/util-linux/2.38/include
+        /opt/homebrew/Cellar/util-linux/2.38/include/blkid)
 
 # find lib
 if (APPLE)
@@ -25,7 +26,7 @@ else (APPLE)
 endif (APPLE)
 FIND_LIBRARY(BLKID_LIBRARIES
         NAMES ${BLKID_NAMES}
-        PATHS /lib64 /lib /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib /usr/lib/x86_64-linux-gnu
+        PATHS /lib64 /lib /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib /usr/lib/x86_64-linux-gnu /opt/homebrew/Cellar/util-linux/2.38/lib
         )
 
 include ("FindPackageHandleStandardArgs")
