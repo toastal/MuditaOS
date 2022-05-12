@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include "StreamFactory.hpp"
@@ -36,6 +36,9 @@ auto StreamFactory::makeStream(Source &source, Sink &sink) -> std::unique_ptr<Ab
 {
     auto sourceFormat = source.getSourceFormat();
     auto sinkFormat   = sink.getSinkFormat();
+
+    LOG_DEBUG(
+        "sourceFormat bit width: %d, sinkFormat bit width: %d", sourceFormat.getBitWidth(), sinkFormat.getBitWidth());
 
     if (sourceFormat == sinkFormat) {
         return makeStream(source.getTraits(), sink.getTraits(), sourceFormat);

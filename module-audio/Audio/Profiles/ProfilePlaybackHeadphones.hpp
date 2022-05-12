@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Profile.hpp"
+#include <log/log.hpp>
 
 namespace audio
 {
@@ -32,6 +33,7 @@ namespace audio
                            qfilter_CalculateCoeffs(audio::equalizer::FilterType::None, 0, 44100, 0.701f, -4)}},
                   AudioDevice::Type::Audiocodec)
         {
+            LOG_ERROR("Volume: %lu", volume);
             audioConfiguration.outputVolume = static_cast<float>(volume);
         }
     };

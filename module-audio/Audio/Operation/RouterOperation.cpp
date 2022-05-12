@@ -63,8 +63,11 @@ namespace audio
         // create streams
         StreamFactory streamFactory(callTimeConstraint);
         try {
+            LOG_DEBUG("Creating dataStreamIn");
             dataStreamIn  = streamFactory.makeStream(*audioDevice, *audioDeviceCellular);
+            LOG_DEBUG("Creating dataStreamOut");
             dataStreamOut = streamFactory.makeStream(*audioDeviceCellular, *audioDevice);
+            LOG_DEBUG("Adios, job done!");
         }
         catch (const std::exception &e) {
             LOG_FATAL("Cannot create audio stream: %s", e.what());
@@ -74,6 +77,7 @@ namespace audio
         // create audio connections
         voiceInputConnection =
             std::make_unique<audio::StreamConnection>(audioDevice.get(), audioDeviceCellular.get(), dataStreamIn.get());
+
         voiceOutputConnection = std::make_unique<audio::StreamConnection>(
             audioDeviceCellular.get(), audioDevice.get(), dataStreamOut.get());
 
@@ -83,6 +87,9 @@ namespace audio
             LOG_DEBUG("Voice input not muted");
             voiceInputConnection->enable();
         }
+
+        LOG_ERROR("Is voiceInputConnection nullptr?: %s", voiceInputConnection == nullptr ? "Yes" : "No");
+        LOG_ERROR("Is voiceOutputConnection nullptr?: %s", voiceOutputConnection == nullptr ? "Yes" : "No");
 
         return audio::RetCode::Success;
     }
@@ -132,6 +139,7 @@ namespace audio
 
     audio::RetCode RouterOperation::SendEvent(std::shared_ptr<Event> evt)
     {
+        LOG_ERROR("SendEvent has been called!!!!");
         auto isAvailable = evt->getDeviceState() == Event::DeviceState::Connected ? true : false;
 
         switch (evt->getType()) {
@@ -175,6 +183,7 @@ namespace audio
 
     audio::RetCode RouterOperation::SwitchProfile(const audio::Profile::Type type)
     {
+        LOG_ERROR("SwitchProfile has been called!!!");
         auto newProfile     = GetProfile(type);
         auto callInProgress = state == State::Active;
 
@@ -214,6 +223,10 @@ namespace audio
 
     void RouterOperation::Mute()
     {
+        if (voiceInputConnection == nullptr) {
+            LOG_ERROR("voiceInputConnection is nullptr :(");
+            return;
+        }
         voiceInputConnection->disable();
         mute = Mute::Enabled;
     }

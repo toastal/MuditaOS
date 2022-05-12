@@ -1,10 +1,10 @@
 {
-  "samplerate": 0,
+  "samplerate": 16000,
   "bitWidth": 16,
-  "flags": 0,
+  "flags": 5,
   "outputVolume": 0,
   "inputGain": 0,
-  "inputPath": 2,
+  "inputPath": 1,
   "outputPath": 0,
   "filterParams": [
     {

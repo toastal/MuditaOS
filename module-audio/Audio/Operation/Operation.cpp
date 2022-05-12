@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include "Operation.hpp"
@@ -102,6 +102,8 @@ namespace audio
         if (auto val = serviceCallback(&reqGain); val) {
             gain = utils::getNumericValue<audio::Gain>(val.value());
         }
+
+        LOG_ERROR("reqVol: %lu, reqGain: %lu", *volume, *gain);
 
         supportedProfiles.emplace_back(Profile::Create(profile, volume, gain), isAvailable);
     }

@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021, Mudita Sp. z.o.o. All rights reserved.
+// Copyright (c) 2017-2022, Mudita Sp. z.o.o. All rights reserved.
 // For licensing, see https://github.com/mudita/MuditaOS/LICENSE.md
 
 #include "PureTxAudioDeviceFactory.hpp"
@@ -8,6 +8,9 @@
 
 #include <Audio/Profiles/Profile.hpp>
 
+#include <magic_enum.hpp>
+#include <log/log.hpp>
+
 using audio::AudioDevice;
 using audio::PureTxAudioCodec;
 using audio::PureTxAudioDeviceFactory;
@@ -16,9 +19,14 @@ using audio::RT1051CellularAudio;
 std::shared_ptr<AudioDevice> PureTxAudioDeviceFactory::getDevice(const audio::Profile &profile)
 {
     std::shared_ptr<AudioDevice> device;
-    switch (profile.GetAudioDeviceType()) {
+
+    auto audioConfiguration = profile.GetAudioConfiguration();
+
+    auto audioDeviceType = profile.GetAudioDeviceType();
+    LOG_ERROR("audioDeviceType: %s", magic_enum::enum_name(audioDeviceType).data());
+    switch (audioDeviceType) {
     case AudioDevice::Type::Audiocodec: {
-        device = std::make_shared<PureTxAudioCodec>(profile.GetAudioConfiguration());
+        device = std::make_shared<PureTxAudioCodec>(audioConfiguration);
     } break;
 
     case AudioDevice::Type::BluetoothA2DP: {

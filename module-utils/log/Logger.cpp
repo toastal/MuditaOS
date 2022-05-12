@@ -31,7 +31,7 @@ namespace Log
             {"ServiceCellular", logger_level::LOGINFO},
 #endif
             {"ServiceAntenna", logger_level::LOGERROR},
-            {"ServiceAudio", logger_level::LOGINFO},
+            {"ServiceAudio", logger_level::LOGDEBUG},
             {"ServiceBluetooth", logger_level::LOGINFO},
             {"ServiceBluetooth_w1", logger_level::LOGINFO},
             {"ServiceFota", logger_level::LOGINFO},

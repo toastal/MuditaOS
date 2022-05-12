@@ -19,9 +19,12 @@ namespace audio
     PureTxAudioCodec::PureTxAudioCodec(const Configuration &format)
         : SAIAudioDevice(BOARD_AUDIOCODEC_SAIx, &rxHandle, &txHandle), saiInFormat{}, saiOutFormat{},
           codecParams{}, codec{},
-          formats(audio::AudioFormat::makeMatrix(supportedSampleRates, supportedBitWidths, supportedChannelModes)),
-          currentFormat(format)
-    {}
+          formats(audio::AudioFormat::makeMatrix(supportedSampleRates, supportedBitWidths, supportedChannelModes))
+    //          currentFormat(format)
+    {
+        LOG_ERROR("format sample rate: %lu", format.sampleRate_Hz);
+        this->currentFormat = format;
+    }
 
     PureTxAudioCodec::~PureTxAudioCodec()
     {
@@ -65,6 +68,7 @@ namespace audio
 
     AudioDevice::RetCode PureTxAudioCodec::Start()
     {
+        LOG_ERROR("currentFormat sample rate: %lu", currentFormat.sampleRate_Hz);
         if (state == State::Running) {
             return AudioDevice::RetCode::Failure;
         }
@@ -290,6 +294,7 @@ namespace audio
     auto PureTxAudioCodec::getSourceFormat() -> audio::AudioFormat
     {
         if (currentFormat.flags == 0) {
+            LOG_ERROR("Well, nullFormat :(");
             return audio::nullFormat;
         }
 
