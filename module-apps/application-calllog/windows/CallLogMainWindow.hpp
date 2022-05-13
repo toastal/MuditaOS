@@ -24,6 +24,7 @@ namespace gui
 
         // virtual methods
         void onBeforeShow(ShowMode mode, SwitchData *data) override;
+        bool onInput(InputEvent const& inputEvent) override;
 
         void rebuild() override;
         void buildInterface() override;

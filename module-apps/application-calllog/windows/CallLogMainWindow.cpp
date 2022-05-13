@@ -6,7 +6,11 @@
 #include "ApplicationCallLog.hpp"
 #include "widgets/CalllogItem.hpp"
 
-#include <service-db/DBCalllogMessage.hpp>
+#include <DialogMetadata.hpp>
+#include <DialogMetadataMessage.hpp>
+
+#include <service-appmgr/Controller.hpp>
+#include <queries/calllog/QueryCalllogDeleteAll.hpp>
 #include <i18n/i18n.hpp>
 #include <Label.hpp>
 #include <Margins.hpp>
@@ -163,14 +167,20 @@ namespace gui
     bool CallLogMainWindow::onDatabaseMessage(sys::Message *msg)
     {
         auto notification = dynamic_cast<db::NotificationMessage *>(msg);
-        if (notification != nullptr) {
-            if (notification->interface == db::Interface::Name::Calllog &&
-                notification->type == db::Query::Type::Create) {
-                rebuild();
-                return true;
-            }
+        if (!notification) {
+            return false;
         }
-        return false;
+
+        if (notification->interface != db::Interface::Name::Calllog) {
+            return false;
+        }
+
+        if (notification->type != db::Query::Type::Create && notification->type != db::Query::Type::Update) {
+            return false;
+        }
+
+        rebuild();
+        return true;
     }
 
     void CallLogMainWindow::onEmptyList()
@@ -187,5 +197,30 @@ namespace gui
         navBar->setActive(gui::nav_bar::Side::Center, true);
         emptyLayout->setVisible(false);
         application->refreshWindow(gui::RefreshModes::GUI_REFRESH_DEEP);
+    }
+
+    bool CallLogMainWindow::onInput(InputEvent const& inputEvent)
+    {
+        if (inputEvent.getKeyCode() != gui::KeyCode::KEY_RIGHT) {
+            return AppWindow::onInput(inputEvent);
+        }
+
+        auto dialogMetadata =
+            gui::DialogMetadata{utils::translate("app_calllog_delete_all_calls"),
+                                "delete_128px_W_G",
+                                utils::translate("app_calllog_delete_all_calls_confirmation"),
+                                "",
+                                [&]() -> bool {
+                                    DBServiceAPI::GetQuery(application,
+                                                           db::Interface::Name::Calllog,
+                                                           std::make_unique<db::query::calllog::DeleteAll>());
+                                    app::manager::Controller::sendAction(application,
+                                                                         app::manager::actions::ShowCallLog);
+                                    return true;
+                                }};
+        auto metaData = std::make_unique<gui::DialogMetadataMessage>(dialogMetadata);
+
+        application->switchWindow(calllog::settings::DialogYesNoStr, std::move(metaData));
+        return false;
     }
 } /* namespace gui */
