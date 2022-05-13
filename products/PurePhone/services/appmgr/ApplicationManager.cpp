@@ -527,6 +527,11 @@ namespace app::manager
             statusIndicators.bluetoothMode    = bluetoothMode;
             statusIndicators.alarmClockStatus = alarmClockStatus;
             app.run(statusIndicators, this);
+
+            if (phoneLockHandler.isPhoneLocked()) {
+                LOG_DEBUG("Phone was locked before app start - locking again");
+                phoneLockHandler.handleLockRequest();
+            }
         }
         return true;
     }
