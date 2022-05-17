@@ -303,6 +303,25 @@ namespace bluetooth
         }
     } constexpr StopAudio;
 
+    struct Call
+    {
+        auto operator()() const
+        {
+            using namespace sml;
+            // clang-format off
+            return make_transition_table(
+                *"Idle"_s = "Idle"_s,
+                "Idle"_s + event<bt::evt::StartRinging> / StartRinging = "Idle"_s,
+               "Idle"_s + event<bt::evt::StopRinging> / StopRinging = "Idle"_s,
+               "Idle"_s + event<bt::evt::StartRouting> /InitializeCall = "Idle"_s,
+               "Idle"_s + event<bt::evt::CallAnswered> / CallAnswered = "Idle"_s,
+               "Idle"_s + event<bt::evt::CallTerminated> / TerminateCall = "Idle"_s,
+               "Idle"_s + event<bt::evt::CallStarted>/ CallStarted = "Idle"_s,
+               "Idle"_s + event<bt::evt::IncomingCallNumber> / IncomingCall= "Idle"_s
+            );
+        }
+    };
+
     struct On
     {
         auto operator()() const
@@ -322,19 +341,15 @@ namespace bluetooth
                        "Idle"_s + event<bt::evt::VisibilityOff> / HandleUnsetVisibility = "Idle"_s,
                        "Idle"_s + event<bt::evt::ConnectAudio> / EstablishAudioConnection = "Idle"_s,
 
-                       "Idle"_s + event<bt::evt::StartRinging> / StartRinging = "Idle"_s,
-                       "Idle"_s + event<bt::evt::StopRinging> / StopRinging = "Idle"_s,
-                       "Idle"_s + event<bt::evt::StartRouting> /InitializeCall = "Idle"_s,
-                       "Idle"_s + event<bt::evt::CallAnswered> / CallAnswered = "Idle"_s,
-                       "Idle"_s + event<bt::evt::CallTerminated> / TerminateCall = "Idle"_s,
-                       "Idle"_s + event<bt::evt::CallStarted>/ CallStarted = "Idle"_s,
-                       "Idle"_s + event<bt::evt::IncomingCallNumber> / IncomingCall= "Idle"_s,
+
                        "Idle"_s + event<bt::evt::SignalStrengthData> / SignalStrength = "Idle"_s,
                        "Idle"_s + event<bt::evt::OperatorNameData>/  SetOperatorName = "Idle"_s,
                        "Idle"_s + event<bt::evt::BatteryLevelData>/ SetBatteryLevel = "Idle"_s,
                        "Idle"_s + event<bt::evt::NetworkStatusData> / SetNetworkStatus = "Idle"_s,
                        "Idle"_s + event<bt::evt::StartStream>/ StartAudio = "Idle"_s,
-                       "Idle"_s + event<bt::evt::StopStream>/ StopAudio = "Idle"_s
+                       "Idle"_s + event<bt::evt::StopStream>/ StopAudio = "Idle"_s,
+
+                        "Idle"_s + event<bt::evt::StartRouting> = state<Call>
                        );
             // clang-format on
         }

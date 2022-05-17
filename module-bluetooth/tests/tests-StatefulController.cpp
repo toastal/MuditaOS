@@ -124,7 +124,8 @@ TEST_CASE("Given StatefulController when turn on then turned on")
     // TODO assert driver initialized
     // TODO test for some loaded devices with some other mockup
     // TODO move machine to Impl and assert for next states
-    // using namespace boost::sml; REQUIRE(controller->impl.is("Shutdown"_s));
+    using namespace boost::sml;
+    REQUIRE(controller.sm.is("Shutdown"_s));
 }
 
 // TEST_CASE("pair")
