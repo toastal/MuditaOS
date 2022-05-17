@@ -12,7 +12,6 @@ auto driver()
 {
     fakeit::Mock<AbstractDriver> mock;
     fakeit::When(Method(mock, init)).AlwaysReturn(Error::Code::Success);
-    fakeit::When(Method(mock, init)).AlwaysReturn(Error::Code::Success);
     fakeit::When(Method(mock, run)).AlwaysReturn(Error::Code::Success);
     fakeit::When(Method(mock, stop)).AlwaysReturn(Error::Code::Success);
     fakeit::When(Method(mock, scan)).AlwaysReturn(Error::Code::Success);
@@ -115,56 +114,215 @@ TEST_CASE("Given StatefulController when turn on then turned on")
     auto devs      = mock::devices();
     auto p         = mock::profile();
     auto profile   = mock_to_shared(&p.get());
-    // auto profile = Mock(mock::profile());
 
     StatefulController::Impl controller(drive, processor, InitializerMock, sett, devs, profile);
 
-    controller.sm.process_event(bt::evt::PowerOn{});
-    controller.sm.process_event(bt::evt::PowerOff{});
-    // TODO assert driver initialized
-    // TODO test for some loaded devices with some other mockup
-    // TODO move machine to Impl and assert for next states
     using namespace boost::sml;
-    REQUIRE(controller.sm.is("Shutdown"_s));
+    controller.sm.process_event(bt::evt::PowerOn{});
+    REQUIRE(controller.sm.is(state<bluetooth::On>));
+
+    controller.sm.process_event(bt::evt::PowerOff{});
+    REQUIRE(controller.sm.is("Off"_s));
 }
 
-// TEST_CASE("pair")
-// {
-//     auto d = driver();
-//     auto drive =  mock_to_shared(&d.get());
-//     auto h = handler();
-//     auto processor = mock_to_shared(&h.get());
-//     auto s = mock::settings();
-//     auto sett = mock_to_shared(&s.get());
-//     auto devs = mock::devices();
-//     auto profile = Mock(mock::profile());
-//
-//     StatefulController controller(drive, processor, InitializerMock, sett, devs, profile.shared());
-//     controller.handle(bt::evt::PowerOn{});
-//     controller.handle(bt::evt::Pair{Devicei{"lol"}});
-//     // TODO test - no pair device in settings
-// }
-//
-// TEST_CASE("unpair")
-// {
-//     auto d = driver();
-//     auto drive =  mock_to_shared(&d.get());
-//     auto h = handler();
-//     auto processor = mock_to_shared(&h.get());
-//     auto s = mock::settings();
-//     auto sett = mock_to_shared(&s.get());
-//     auto devs = mock::devices();
-//     auto profile = Mock(mock::profile());
-//     StatefulController controller(drive, processor, InitializerMock, sett, devs, profile.shared());
-//
-//     controller.handle(bt::evt::PowerOn{});
-//     // TODO here nothing happens
-//     controller.handle(bt::evt::Unpair{Devicei{"lol"}});
-//     // TODO here - device added
-//     controller.handle(bt::evt::Pair{Devicei{"lol"}});
-//     // TODO here device removed
-//     controller.handle(bt::evt::Pair{Devicei{"lol"}});
-// }
+TEST_CASE("pair/unpair")
+{
+    auto d         = driver();
+    auto drive     = mock_to_shared(&d.get());
+    auto h         = handler();
+    auto processor = mock_to_shared(&h.get());
+    auto s         = mock::settings();
+    auto sett      = mock_to_shared(&s.get());
+    auto devs      = mock::devices();
+    auto p         = mock::profile();
+    auto profile   = mock_to_shared(&p.get());
+
+    StatefulController::Impl controller(drive, processor, InitializerMock, sett, devs, profile);
+    using namespace boost::sml;
+
+    auto device = Devicei{"lol"};
+
+    REQUIRE(controller.sm.process_event(bt::evt::PowerOn{}));
+    REQUIRE(controller.sm.is(state<bluetooth::On>));
+
+    REQUIRE(controller.sm.process_event(bt::evt::Pair{device}));
+    fakeit::Verify(Method(h, pair)).Exactly(1);
+
+    REQUIRE(controller.sm.process_event(bt::evt::Unpair{device}));
+    fakeit::Verify(Method(h, unpair)).Exactly(1);
+}
+
+TEST_CASE("start/stop scan")
+{
+    auto d         = driver();
+    auto drive     = mock_to_shared(&d.get());
+    auto h         = handler();
+    auto processor = mock_to_shared(&h.get());
+    auto s         = mock::settings();
+    auto sett      = mock_to_shared(&s.get());
+    auto devs      = mock::devices();
+    auto p         = mock::profile();
+    auto profile   = mock_to_shared(&p.get());
+
+    StatefulController::Impl controller(drive, processor, InitializerMock, sett, devs, profile);
+    using namespace boost::sml;
+
+    REQUIRE(controller.sm.process_event(bt::evt::PowerOn{}));
+    REQUIRE(controller.sm.is(state<bluetooth::On>));
+
+    REQUIRE(controller.sm.process_event(bt::evt::StartScan{}));
+    fakeit::Verify(Method(h, scan)).Exactly(1);
+
+    REQUIRE(controller.sm.process_event(bt::evt::StopScan{}));
+    fakeit::Verify(Method(h, stopScan)).Exactly(1);
+}
+
+TEST_CASE("call test - incoming call")
+{
+    auto d         = driver();
+    auto drive     = mock_to_shared(&d.get());
+    auto h         = handler();
+    auto processor = mock_to_shared(&h.get());
+    auto s         = mock::settings();
+    auto sett      = mock_to_shared(&s.get());
+    auto devs      = mock::devices();
+    auto p         = mock::profile();
+    auto profile   = mock_to_shared(&p.get());
+
+    StatefulController::Impl controller(drive, processor, InitializerMock, sett, devs, profile);
+    using namespace boost::sml;
+
+    REQUIRE(controller.sm.process_event(bt::evt::PowerOn{}));
+    REQUIRE(controller.sm.is(state<bluetooth::On>));
+    auto number = utils::PhoneNumber::View{};
+
+    SECTION("dropped call")
+    {
+        REQUIRE(controller.sm.process_event(bt::evt::IncomingCallNumber{number}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>("CallRinging"_s));
+        fakeit::Verify(Method(p, startRinging)).Exactly(1);
+        fakeit::Verify(Method(p, setIncomingCallNumber)).Exactly(1);
+
+        REQUIRE(controller.sm.process_event(bt::evt::CallTerminated{}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>(sml::X));
+        REQUIRE(controller.sm.is(state<bluetooth::On>));
+        fakeit::Verify(Method(p, terminateCall)).Exactly(1);
+    }
+
+    SECTION("answered call")
+    {
+        REQUIRE(controller.sm.process_event(bt::evt::IncomingCallNumber{number}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>("CallRinging"_s));
+        fakeit::Verify(Method(p, startRinging)).Exactly(1);
+        fakeit::Verify(Method(p, setIncomingCallNumber)).Exactly(1);
+
+        REQUIRE(controller.sm.process_event(bt::evt::CallAnswered{}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>("CallInProgress"_s));
+        fakeit::Verify(Method(p, callAnswered)).Exactly(1);
+
+        REQUIRE(controller.sm.process_event(bt::evt::CallTerminated{}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>(sml::X));
+        REQUIRE(controller.sm.is(state<bluetooth::On>));
+        fakeit::Verify(Method(p, terminateCall)).Exactly(1);
+    }
+
+    SECTION("missed call")
+    {
+        REQUIRE(controller.sm.process_event(bt::evt::IncomingCallNumber{number}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>("CallRinging"_s));
+        fakeit::Verify(Method(p, startRinging)).Exactly(1);
+        fakeit::Verify(Method(p, setIncomingCallNumber)).Exactly(1);
+
+        REQUIRE(controller.sm.process_event(bt::evt::StopRinging{}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>(sml::X));
+        REQUIRE(controller.sm.is(state<bluetooth::On>));
+        fakeit::Verify(Method(p, stopRinging)).Exactly(1);
+    }
+    SECTION("double missed call")
+    {
+        LOG_INFO("Double missed call");
+        REQUIRE(controller.sm.process_event(bt::evt::IncomingCallNumber{number}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>("CallRinging"_s));
+        fakeit::Verify(Method(p, startRinging)).Exactly(1);
+        fakeit::Verify(Method(p, setIncomingCallNumber)).Exactly(1);
+
+        REQUIRE(controller.sm.process_event(bt::evt::StopRinging{}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>(sml::X));
+        REQUIRE(controller.sm.is(state<bluetooth::On>));
+        fakeit::Verify(Method(p, stopRinging)).Exactly(1);
+
+        REQUIRE(controller.sm.process_event(bt::evt::IncomingCallNumber{number}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>("CallRinging"_s));
+        fakeit::Verify(Method(p, startRinging)).Exactly(2);
+        fakeit::Verify(Method(p, setIncomingCallNumber)).Exactly(2);
+
+        REQUIRE(controller.sm.process_event(bt::evt::StopRinging{}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>(sml::X));
+        REQUIRE(controller.sm.is(state<bluetooth::On>));
+        fakeit::Verify(Method(p, stopRinging)).Exactly(2);
+    }
+}
+
+TEST_CASE("call test - outgoing call")
+{
+    LOG_INFO("Outgoing tests");
+    auto d         = driver();
+    auto drive     = mock_to_shared(&d.get());
+    auto h         = handler();
+    auto processor = mock_to_shared(&h.get());
+    auto s         = mock::settings();
+    auto sett      = mock_to_shared(&s.get());
+    auto devs      = mock::devices();
+    auto p         = mock::profile();
+    auto profile   = mock_to_shared(&p.get());
+
+    StatefulController::Impl controller(drive, processor, InitializerMock, sett, devs, profile);
+    using namespace boost::sml;
+
+    REQUIRE(controller.sm.process_event(bt::evt::PowerOn{}));
+    REQUIRE(controller.sm.is(state<bluetooth::On>));
+    auto number = utils::PhoneNumber::View{};
+
+    SECTION("dropped call")
+    {
+        REQUIRE(controller.sm.process_event(bt::evt::CallStarted{number}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>("CallInitiated"_s));
+        fakeit::Verify(Method(p, callStarted)).Exactly(1);
+
+        REQUIRE(controller.sm.process_event(bt::evt::CallTerminated{}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>(sml::X));
+        REQUIRE(controller.sm.is(state<bluetooth::On>));
+        fakeit::Verify(Method(p, terminateCall)).Exactly(1);
+    }
+
+    SECTION("answered call")
+    {
+        REQUIRE(controller.sm.process_event(bt::evt::CallStarted{number}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>("CallInitiated"_s));
+        fakeit::Verify(Method(p, callStarted)).Exactly(1);
+
+        REQUIRE(controller.sm.process_event(bt::evt::CallAnswered{}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>("CallInProgress"_s));
+        fakeit::Verify(Method(p, callAnswered)).Exactly(1);
+
+        REQUIRE(controller.sm.process_event(bt::evt::CallTerminated{}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>(sml::X));
+        REQUIRE(controller.sm.is(state<bluetooth::On>));
+        fakeit::Verify(Method(p, terminateCall)).Exactly(1);
+    }
+
+    SECTION("miss-clicked call")
+    {
+        REQUIRE(controller.sm.process_event(bt::evt::CallStarted{number}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>("CallInitiated"_s));
+        fakeit::Verify(Method(p, callStarted)).Exactly(1);
+
+        REQUIRE(controller.sm.process_event(bt::evt::CallTerminated{}));
+        REQUIRE(controller.sm.is<decltype(state<Call>)>(sml::X));
+        REQUIRE(controller.sm.is(state<bluetooth::On>));
+        fakeit::Verify(Method(p, terminateCall)).Exactly(1);
+    }
+}
 //
 //
 //
