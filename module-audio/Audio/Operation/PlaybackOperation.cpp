@@ -21,6 +21,7 @@ namespace audio
         : Operation(callback, playbackType), dec(nullptr)
     {
         // order defines priority
+        AddProfile(Profile::Type::PlaybackEarspeaker, playbackType, true);
         AddProfile(Profile::Type::PlaybackHeadphones, playbackType, false);
         AddProfile(Profile::Type::PlaybackBluetoothA2DP, playbackType, false);
         AddProfile(Profile::Type::PlaybackLoudspeaker, playbackType, true);
@@ -167,6 +168,16 @@ namespace audio
             SetProfileAvailability({Profile::Type::PlaybackBluetoothA2DP}, isAvailable);
             Operation::SwitchToPriorityProfile();
             break;
+        case EventType::SwitchEarspeakerPlayback:
+            LOG_ERROR("Received Earspeaker playback request, isAvailable: %d", isAvailable);
+            SetProfileAvailability({Profile::Type::PlaybackEarspeaker}, isAvailable);
+            if (isAvailable) {
+                SwitchProfile(Profile::Type::PlaybackEarspeaker);
+            }
+            else {
+                Operation::SwitchToPriorityProfile();
+            }
+            break;
         default:
             return RetCode::UnsupportedEvent;
         }
@@ -183,9 +194,9 @@ namespace audio
         }
 
         if (currentProfile && currentProfile->GetType() == newProfile->GetType()) {
-            return RetCode::Success;
+            //  return RetCode::Success;
+            LOG_WARN("The same devices");
         }
-
         // adjust new profile with information from file's tags
         newProfile->SetSampleRate(dec->getSourceFormat().getSampleRate());
         newProfile->SetInOutFlags(static_cast<uint32_t>(audio::codec::Flags::OutputStereo));
